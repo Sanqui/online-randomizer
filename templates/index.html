@@ -17,23 +17,35 @@
 {% endmacro %}
 <html>
 <head>
-    <title>Randomizer!</title>
+    <title>Online Randomizer!</title>
+    <link href="static/css/semantic.min.css" rel="stylesheet" type="text/css" media="all">
     <style>
 
-dt {/*font-weight:bold;*/ float:left; width:30%; clear:left;}
+html {background: #ddd; color: #222;}
+body {margin: auto; max-width: 800px;  padding: 12px;}
+.main {background: white; padding: 12px; border-radius:8px;}
+dt {/*font-weight:bold;*/ float:left; width:50%; clear:left;}
 dt::after {content:'';}
 
-#options {border: 1px solid #aaa; padding:6px;}
+.logo {text-align: center;}
 
-footer {border-top: 1px solid #aaa; margin-top:12px; padding-top:6px;}
+code {font-size:12px;}
+
+#randomizer_options {margin-top: 8px;}
+/*#options {border: 1px solid #aaa; padding:6px;}*/
+
+/*footer {border-top: 1px solid #aaa; margin-top:12px; padding-top:6px;}*/
 
 
     </style>
+    
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script>
 
 var games = {{games_json | safe}}
 var curgame
+var generating = false
+var options_showed = false
 
 function render_options(gameid) {
     console.log(gameid)
@@ -41,24 +53,42 @@ function render_options(gameid) {
     for (gameid_ in games) {
         $("#options-"+gameid_).hide()
     }
-    $("#options-"+gameid).show()
-    $("#options_controls").show()
-    $("#controls").show()
+    //$("#options").show()
+    //$("#options_controls").show()
+    //$("#controls").show()
+    if (!options_showed) {
+        $("#randomizer_options").fadeIn(1000)
+        $("#options-"+gameid).show()
+        options_showed = true
+    }
+    else {
+        $("#options-"+gameid).fadeIn(500)
+    }
 }
 
 function generate() {
-    $("#btn-generate").hide()
-    $("#generating").show()
-    $("#generating").html('Hold on!')
-    $.post('/generate', $("#form-"+curgame+", #filename").serialize(), generated, 'json').fail(oops)
+    if (!generating) {
+        $("#btn-generate").addClass('loading')
+        generating = true
+        //$("#btn-generate").click(function(){})
+        $("#generating").show()
+        //$("#generating").html('Hold on!')
+        $.post('/generate', $("#form-"+curgame+", #filename").serialize(), generated, 'json').fail(oops)
+    }
 }
 
 function generated(data) {
+    generating = false
     if (data.cooldown) {
+        $("#btn-generate").removeClass('loading')
         $("#btn-generate").show()
         $("#generating").html("Please wait " + Math.round(data.cooldown) + " more seconds before requesting a ROM.")
     } else {
-        $("#generating").html("Randomized ROM generated in "+ (Math.round(data.time*100)/100) +"s! <a href='"+data.filename+"'>Download</a><br>Link for sharing with friends: <code>"+data.filename+"</code>")
+        $("#btn-generate").removeClass('loading')
+        $("#btn-generate").show()
+        $("#btn-generate").text("Generate")
+        $("#filename").val("")
+        $("#generating").html("Randomized ROM generated in "+ (Math.round(data.time*100)/100) +"s! <a href='"+data.filename+"'>Download</a><br>Link for sharing with friends:<br><code>http://sanqui.rustedlogic.net/randomizer/"+data.filename+"</code>")
     }
 }
 function oops(x) {
@@ -76,54 +106,78 @@ $(document).ready(function(){
     </script>
 </head>
 <body>
-    <h1>Online Randomizer</h1>
-    <h2>Pick a game:</h2>
-    <div id="games">
-        {% for game in games %}
-            <button data-game="{{game.identifier}}" id="btn-{{game.identifier}}">{{game.name}}</button>
-        {% endfor %}
-    </div>
-    <div id="options_controls" style="display:none;">
-        <h2>Pick some options:</h2>
-        <button id="btn-select-all">Select all</button><button id='btn-select-none'>Select none</button>
-    </div>
-    <div id="options">
-        {% for game in games %}
-            <div id="options-{{game.identifier}}" style="display:none;">
-                <form id="form-{{game.identifier}}">
-                    <input type="hidden" name="game" value="{{game.identifier}}">
-                    <dl>
-                    {% for field in game.Form() %}
-                        {{ render_field(field) }}
-                    {% endfor %}
-                    </dl>
-                </form>
+    <div class="main">
+        <h1 class="logo"><img src="https://i.imgur.com/Z0k2D3y.png" alt="Online Randomizer"></h1>
+        <h2 class="ui header">Pick a game:</h2>
+        <div id="games" class="ui buttons">
+            {% for game in games %}
+                <button class="ui button" data-game="{{game.identifier}}" id="btn-{{game.identifier}}">{{game.name}}</button>
+            {% endfor %}
+        </div>
+        <div id="randomizer_options" style="display:none;">
+            <div id="options_controls" class="ui top attached header">
+                <h3 class="ui header">Pick some options:</h2>
             </div>
-        {% endfor %}
+            <div id="options" class="ui segment attached">
+                <div class="ui mini buttons">
+                    <button id="btn-select-all"  class="ui button">Select all</button>
+                    <button id='btn-select-none' class="ui button">Select none</button>
+                </div>
+                {% for game in games %}
+                    <div id="options-{{game.identifier}}" style="display:none;">
+                        <form id="form-{{game.identifier}}">
+                            <input type="hidden" name="game" value="{{game.identifier}}">
+                            <dl>
+                            {% for field in game.Form() %}
+                                {{ render_field(field) }}
+                            {% endfor %}
+                            </dl>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+            <div id="controls" class="ui bottom attached header">
+                <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename">
+                <button id="btn-generate" class="ui button">Generate</button>
+                <div id="generating" style="display:none;"></div>
+            </div>
+        </div>
     </div>
-    <div id="controls" style="display:none;">
-        Custom filename: <input type="text" id="filename", name="filename"> (not yet)<br>
-        <button id="btn-generate">Generate</button>
-        <div id="generating" style="display:none;"></div>
-    </div>
-    <footer>
-        <h3>Gen 1 Style Sprite Credits</h3>
-        <ul>
-            <li><a href="http://project-rbydex.deviantart.com/">Project-RBYDex</a>
-            <li><a href="http://chickenmcfuckit.deviantart.com/">chickenmcfuckit</a>
-            <li><a href="https://twitter.com/Karmaverick">Karmaverick</a>
-            <li><a href="http://tinyurl.com/4poyc6x">Behold3r</a>
-            <li><a href="http://involuntary-twitch.deviantart.com/">Involuntary-Twitch</a>
-            <li><a href="http://racieb.deviantart.com/">RacieB</a>
-            <li><a href="http://mylittlekeldeo.deviantart.com/">mylittlekeldeo</a>
-            <li><a href="#">Sanqui</a>
-            <li><a href="http://solo993.deviantart.com/">solo993</a>
-            <li>Other Gen 2-5 sprites done mostly by anons of /vp/.<br><small>See credits on <a href="http://www.tehowners.com/info/Non-Informative/Pokemon%20Sprites%20in%20Gen%201%20Style%20.png">this sheet</a>.  Plaese note that many of the sprites presented there are not in use.</small>
-        </ul>
-        <p>Huge thanks to everybody for their contributions!
-        <p>Randomizer by Sanqui.
-        <p><small>You <b>may not</b> publically post links to ROMs generated by this randomizer online.</small>
+    <div class="ui divider"></div>
+    <footer class="ui two column  aligned relaxed grid basic segment">
+        <div class="column">
+            <h3 class="ui header">Gen 1 Style Sprite Credits</h3>
+            <ul>
+                <li><a href="http://project-rbydex.deviantart.com/">Project-RBYDex</a>
+                <li><a href="http://chickenmcfuckit.deviantart.com/">chickenmcfuckit</a>
+                <li><a href="https://twitter.com/Karmaverick">Karmaverick</a>
+                <li><a href="http://tinyurl.com/4poyc6x">Behold3r</a>
+                <li><a href="http://involuntary-twitch.deviantart.com/">Involuntary-Twitch</a>
+                <li><a href="http://racieb.deviantart.com/">RacieB</a>
+                <li><a href="http://mylittlekeldeo.deviantart.com/">mylittlekeldeo</a>
+                <li><a href="http://sanqui.rustedlogic.net/">Sanqui</a>
+                <li><a href="http://solo993.deviantart.com/">solo993</a>
+                <li>Other Gen 2-5 sprites done mostly by anons of /vp/.<br><small>See credits on <a href="http://www.tehowners.com/info/Non-Informative/Pokemon%20Sprites%20in%20Gen%201%20Style%20.png">this sheet</a>.  Please note that many of the sprites presented there are not in use.</small>
+            </ul>
+            <p>Huge thanks to everybody for their contributions!
+        </div>
+        <!--<div class="ui vertical divider"></div>-->
+        <div class="column">
+            <h3 class="ui header">Planned features!</h3>
+            <ul>
+                <li>Randomize field items
+                <li>Yellow support
+                <li>Backsprites
+                <li>Newer moves
+                <li>More games
+                <li>Meaningful moves and progression
+                <li>Pokédex flavor
+                <li>idk, whatever you come up with?
+            </ul>
+        </div>
     </footer>
+    <p>Randomizer by Sanqui aka Sanky.
+    <p><small>You <b>may not</b> publically post links to ROMs generated by this randomizer online.</small>
 </body>
 </html>
 
