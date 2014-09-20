@@ -30,7 +30,7 @@ type_efficacy = []
 for row in open('data/type_efficacy.csv').readlines():
     type0, type1, factor = [int(x) for x in row.split(',')]
     type_efficacy.append((type_names[type0], type_names[type1], factor))
-
+monpals = open('data/monpals.txt').read().split('\n')
 
 menu_icons = ['mon ball helix fairy bird water bug grass snake quadruped -'.split().index(l.strip()) for l in open('data/menu_icons.txt')]
 
@@ -247,7 +247,7 @@ class PokemonRed(Game):
     
     KEY_ITEMS = [0x2B, 0x30, 0x3B, 0x40, 0x48, 0x4A, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8]
     
-    #print FIELD_ITEMS
+    PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
     
             
     
@@ -512,10 +512,10 @@ GrowthRateTable: ; 5901d (16:501d)
         for i in range(150/2):
             self.rom.writebyte( (menu_icons[dex[i*2]] << 4) | menu_icons[dex[i*2+1]])
         
-        # We don't have palettes yet, so at least don't show wrong ones.
+        # Write palettes
         self.rom.seek(self.symbols["MonsterPalettes"])
-        for i in range(152):
-            self.rom.writebyte(0x19)
+        for i in range(150):
+            self.rom.writebyte(self.PALS[monpals[dex[i]-1]])
     opt_game_pokemon.layer = -1
         
     def opt_update_types(self):
