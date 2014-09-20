@@ -67,6 +67,19 @@ function render_options(gameid) {
     }
 }
 
+function set_preset(presetid) {
+    $('#options input').prop('checked', false)
+    preset = games[curgame].presets[presetid]
+    console.log(preset)
+    for (option in preset) {
+        if (preset[option] === true) {
+            $("#"+option).prop('checked', true)
+        } else {
+            $("#"+option).val(preset[option])
+        }
+    }
+}
+
 function generate() {
     if (!generating) {
         $("#btn-generate").addClass('loading')
@@ -99,6 +112,9 @@ function oops(x) {
 $(document).ready(function(){
     for (gameid in games) {
         $('#btn-'+gameid).click(function() {render_options(this.getAttribute('data-game')) })
+        for (presetid in games[gameid].presets) {
+            $('#btn-preset-'+presetid).click(function() {set_preset(this.getAttribute('data-preset')) })
+        }
     }
     $('#btn-select-all').click(function() { $('#options input').prop('checked', true)})
     $('#btn-select-none').click(function() { $('#options input').prop('checked', false)})
@@ -107,6 +123,9 @@ $(document).ready(function(){
     </script>
 </head>
 <body>
+    {% if debug %}
+        <div class="ui label top right attached red" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;">NOT THE REAL THING!</div>
+    {% endif %}
     <div class="main">
         <h1 class="logo"><img src="https://i.imgur.com/Z0k2D3y.png" alt="Online Randomizer"></h1>
         <h2 class="ui header">Pick a game:</h2>
@@ -126,6 +145,16 @@ $(document).ready(function(){
                 </div>
                 {% for game in games %}
                     <div id="options-{{game.identifier}}" style="display:none;">
+                        {% if game.presets %}
+                            <div class="ui label top right attached">
+                                Presets:
+                                <div class="ui mini buttons">
+                                    {% for preset in game.presets %}
+                                        <button id="btn-preset-{{preset}}" data-preset="{{preset}}" class="ui button">{{preset}}</button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
                         <form id="form-{{game.identifier}}">
                             <input type="hidden" name="game" value="{{game.identifier}}">
                             <dl>
@@ -166,7 +195,7 @@ $(document).ready(function(){
         <div class="column">
             <h3 class="ui header">Planned features!</h3>
             <ul>
-                <li>Presets
+                <li>Randomize moves (for classic)
                 <li>Randomize field items
                 <li>Yellow support
                 <li>Backsprites

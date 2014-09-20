@@ -8,13 +8,16 @@ from flask import render_template, jsonify, request
 app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = '/randomizer'
 
+debug = False
+
 import randomizer
 
 games_json = {}
 for game in randomizer.games:
     game_json = {}
     game_json['name'] = game.name
-    game_json['options'] = {}#game.options
+    game_json['options'] = {} #game.options
+    game_json['presets'] = game.presets #game.options
     games_json[game.identifier] = game_json
 
 games_json = json.dumps(games_json)
@@ -48,10 +51,11 @@ def generate():
 
 @app.route("/")
 def index():
-    return render_template("index.html", games=randomizer.games, games_json=games_json)
+    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug)
 
 if __name__ == "__main__":
     print "Running..."
+    debug = True
     app.run(host="", port=8080, debug=True, threaded=True)
 
 if not app.debug:

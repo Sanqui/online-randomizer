@@ -17,6 +17,9 @@ import yaml
 
 from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, RadioField, SelectField, SelectMultipleField, BooleanField, HiddenField, SubmitField, Field, validators, ValidationError, widgets
 
+def dechoices(c):
+    return [x.split(':') for x in c.split(';')]
+
 class Heading(Field):
     def __call__(self, **kwargs):
         return "<h3 class='ui header'>"+self.label.text+"</h3>"
@@ -63,6 +66,7 @@ class Game():
     identifier = "game"
     
     #options = {"dummy": "Randomize a thing"}
+    presets = {}
     
     # TODO form
     
@@ -143,12 +147,12 @@ class PokemonRed(Game):
     class Form(Form):
         h_randomize = Heading("Randomizations")
         
-        starter_pokemon = SelectField('Starter Pokémon', choices=[x.split(':') for x in ":Keep,randomize:Random,basics:Random basics,three-basic:Random three stage basics,single:Single random (yellow style)".split(',')], default="")
+        starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon")
         wild_pokemon = BooleanField("Randomize wild Pokémon")
         game_pokemon = BooleanField("Randomize Pokémon from all gens in")
-        special_conversion = SelectField('Special stat conversion', choices=OrderedDict(average="Average", spa="Sp. Attack", spd="Sp. Defense", higher="Higher stat", random="Random stat").items(), default="average")
-        move_rules = SelectField('Fair random move rules', choices=[x.split(':') for x in ":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore".split(';')], default="no-hms-broken")
+        special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average")
+        move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken")
         cries = BooleanField("Randomize Pokémon cries")
         tms = BooleanField("Randomize the moves TMs teach")
         field_items = SelectField('Field items', choices=[('','-'),('shuffle','Shuffle')], default="")
@@ -157,6 +161,26 @@ class PokemonRed(Game):
         update_types = BooleanField("Update types to X/Y")
         instant_text = BooleanField("Instant text speed")
     
+    presets = {
+        'race': {
+            'starter_pokemon': 'randomize',
+            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True,
+            'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
+            'tms': True, 'field_items': 'shuffle', 'update_types': True
+        },
+        'casual': {
+            'starter_pokemon': 'three-basic',
+            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True,
+            'special_conversion': 'average', 'move_rules': '', 'cries': True,
+            'tms': True, 'field_items': 'shuffle', 'update_types': True
+        },
+        'classic': {
+            'starter_pokemon': 'randomize',
+            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False,
+            'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
+            'tms': True, 'field_items': '', 'update_types': False
+        }
+    }
     
     CHARS = {' ': 127, '!': 231, '#': 84, '&': 233, "'": 224, "é": 0xba, "É": 0xba, "'d": 208, "'l": 209, "'m": 210, "'r": 211, "'s": 212, "'t": 213, "'v": 214, '(': 154, ')': 155, ',': 244, '-': 227, '.': 232, '/': 243, '0': 246, '1': 247, '2': 248, '3': 249, '4': 250, '5': 251, '6': 252, '7': 253, '8': 254, '9': 255, ':': 156, ';': 157, '?': 230, '@': 80, 'A': 128, 'B': 129, 'C': 130, 'D': 131, 'E': 132, 'F': 133, 'G': 134, 'H': 135, 'I': 136, 'J': 137, 'K': 138, 'L': 139, 'M': 140, 'N': 141, 'O': 142, 'P': 143, 'Q': 144, 'R': 145, 'S': 146, 'T': 147, 'U': 148, 'V': 149, 'W': 150, 'X': 151, 'Y': 152, 'Z': 153, '[': 158, ']': 159, 'a': 160, 'b': 161, 'c': 162, 'd': 163, 'e': 164, 'f': 165, 'g': 166, 'h': 167, 'i': 168, 'j': 169, 'k': 170, 'l': 171, 'm': 172, 'n': 173, 'o': 174, 'p': 175, 'q': 176, 'r': 177, 's': 178, 't': 179, 'u': 180, 'v': 181, 'w': 182, 'x': 183, 'y': 184, 'z': 185, '¥': 240, '×': 241, '…': 117, '№': 116, '→': 235, '─': 122, '│': 124, '┌': 121, '┐': 123, '└': 125, '┘': 126, '▶': 237, '▷': 236, '▼': 238, '♀': 245, '♂': 239, '<': 0xe1, '>': 0xe2,}
     
