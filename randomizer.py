@@ -205,7 +205,7 @@ class PokemonRed(Game):
              'water-stone': 0x22, 'leaf-stone': 0x2f} # TODO
              
     MAXMOVE = 0xa4 # substitute
-    FAIR_MOVES = set(range(1, MAXMOVE)) - {144} # +1 ? # transform
+    FAIR_MOVES = set(range(1, MAXMOVE+1)) - {144} # +1 ? # transform
     
     DEX_FAMILIES = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30, 31], [32, 33, 34], [35, 36], [37, 38], [39, 40], [41, 42], [43, 44, 45], [46, 47], [48, 49], [50, 51], [52, 53], [54, 55], [56, 57], [58, 59], [60, 61, 62], [63, 64, 65], [66, 67, 68], [69, 70, 71], [72, 73], [74, 75, 76], [77, 78], [79, 80], [81, 82], [83], [84, 85], [86, 87], [88, 89], [90, 91], [92, 93, 94], [95], [96, 97], [98, 99], [100, 101], [102, 103], [104, 105], [106, 107], [108], [109, 110], [111, 112], [113], [114], [115], [116, 117], [118, 119], [120, 121], [122], [123], [124], [125], [126], [127], [128], [129, 130], [131], [132], [133, 134, 135, 136], [137], [138, 139], [140, 141], [142], [143], [144], [145], [146], [147, 148, 149], [150], [151]]
     DEX = range(1, 152)
@@ -356,6 +356,7 @@ class PokemonRed(Game):
         while len(dex) < 150:
             randfamily = choice(minidex['evolution_chains'])
             #if randfamily[0] >= 719: continue # Diancie, no sprites
+            if randfamily[0] == 151: pass
             if randfamily not in dex_families and len(dex)+len(randfamily) <= 150:
                 dex += randfamily
                 dex_families.append(randfamily)
@@ -487,6 +488,9 @@ GrowthRateTable: ; 5901d (16:501d)
                         rom.write(chr(level))
                         rom.write(chr(choice(self.FAIR_MOVES)))
                 rom.writebyte(0) # end moves
+            if dexnum == 151:
+                rom.writebyte(0)
+                rom.writebyte(0)
         assert rom.tell() < 0x3c000
         
         rom.seek(self.symbols["EvosMovesPointerTable"])
