@@ -155,7 +155,7 @@ $(document).ready(function(){
                                 </div>
                             </div>
                         {% endif %}
-                        <form id="form-{{game.identifier}}" class="ui form">
+                        <form id="form-{{game.identifier}}" class="">
                             <input type="hidden" name="game" value="{{game.identifier}}">
                             <dl>
                             {% for field in game.Form() %}
