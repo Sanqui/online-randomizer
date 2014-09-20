@@ -3,6 +3,8 @@ rm sprites/ backsprites/ -r
 
 mkdir sprites
 
+wget -O sprites.png http://wyndows.sweb.cz/Pokemon%20Sprites%20in%20Gen%201%20Style%20fixed.png
+
 convert sprites.png -crop 96x96 +repage -scene 1 +adjoin sprites/%03d.png
 mogrify -trim -flop -background white -gravity center -extent 56x56 -dither None -colors 4 sprites/*
 
