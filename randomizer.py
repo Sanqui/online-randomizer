@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 from collections import OrderedDict
 
+import os
 import datetime
 import struct
 import random
@@ -87,7 +88,7 @@ class Game():
     def finalize(self):
         pass
     
-    def produce(self):
+    def produce(self, filename):
         # First let's make sure the input is right...
         #for option, value in self.choices.items():
         #    if option not hasattr(self, "opt_"+option):
@@ -96,7 +97,19 @@ class Game():
         # Now let's make us a ROM
         
         original = open('roms/'+self.filename, 'rb').read()
-        filename = "static/roms/"+datetime.datetime.now().strftime("%Y%m%dT%H%M%S_")+self.filename
+        if filename:
+            filename = filename.replace('/', '_').replace('\0', '')
+            filename = "static/roms/"+filename
+            while os.path.isfile(filename+'.gbc'):
+                filename += '_'
+            if not filename.endswith('.gbc'):
+                filename += '.gbc'
+        else:
+            filename = "static/roms/"+datetime.datetime.now().strftime("%Y%m%dT%H%M%S_")+self.filename
+            while os.path.isfile(filename):
+                filename = filename.strip('.')
+                filename[-2] += '_'
+                filename = filename.join('.')
         self.rom = ROM(filename, 'w+b')
         self.rom.write(original)
         

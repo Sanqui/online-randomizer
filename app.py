@@ -6,6 +6,7 @@ import json
 from flask import Flask
 from flask import render_template, jsonify, request
 app = Flask(__name__)
+app.config['APPLICATION_ROOT'] = '/randomizer'
 
 import randomizer
 
@@ -28,7 +29,7 @@ def generate():
     starttime = time.time()
     gameid = request.form.get('game')
     for g in randomizer.games:
-        print g.identifier, gameid
+        #print g.identifier, gameid
         if g.identifier == gameid:
             Game = g
     
@@ -36,7 +37,7 @@ def generate():
     form = game.Form(request.form)
     for field in form:
         game.choices[field.name] = field.data
-    filename = game.produce()
+    filename = game.produce(filename=request.form.get('filename'))
     
     endtime = time.time()
     cooldowns[ip] = endtime

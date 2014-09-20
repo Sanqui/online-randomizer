@@ -17,6 +17,7 @@
 {% endmacro %}
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Online Randomizer!</title>
     <link href="static/css/semantic.min.css" rel="stylesheet" type="text/css" media="all">
     <style>
@@ -73,7 +74,7 @@ function generate() {
         //$("#btn-generate").click(function(){})
         $("#generating").show()
         //$("#generating").html('Hold on!')
-        $.post('/generate', $("#form-"+curgame+", #filename").serialize(), generated, 'json').fail(oops)
+        $.post('generate', $("#form-"+curgame+", #filename").serialize(), generated, 'json').fail(oops)
     }
 }
 
@@ -116,7 +117,7 @@ $(document).ready(function(){
         </div>
         <div id="randomizer_options" style="display:none;">
             <div id="options_controls" class="ui top attached header">
-                <h3 class="ui header">Pick some options:</h2>
+                <h3 class="ui header">Pick some options:</h3>
             </div>
             <div id="options" class="ui segment attached">
                 <div class="ui mini buttons">
@@ -137,7 +138,7 @@ $(document).ready(function(){
                 {% endfor %}
             </div>
             <div id="controls" class="ui bottom attached header">
-                <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename">
+                <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename">.gbc
                 <button id="btn-generate" class="ui button">Generate</button>
                 <div id="generating" style="display:none;"></div>
             </div>
@@ -149,7 +150,7 @@ $(document).ready(function(){
             <h3 class="ui header">Gen 1 Style Sprite Credits</h3>
             <ul>
                 <li><a href="http://project-rbydex.deviantart.com/">Project-RBYDex</a>
-                <li><a href="http://chickenmcfuckit.deviantart.com/">chickenmcfuckit</a>
+                <li><a href="http://azpainter.tumblr.com/">azpainter</a>
                 <li><a href="https://twitter.com/Karmaverick">Karmaverick</a>
                 <li><a href="http://tinyurl.com/4poyc6x">Behold3r</a>
                 <li><a href="http://involuntary-twitch.deviantart.com/">Involuntary-Twitch</a>
@@ -165,6 +166,7 @@ $(document).ready(function(){
         <div class="column">
             <h3 class="ui header">Planned features!</h3>
             <ul>
+                <li>Presets
                 <li>Randomize field items
                 <li>Yellow support
                 <li>Backsprites
@@ -172,6 +174,7 @@ $(document).ready(function(){
                 <li>More games
                 <li>Meaningful moves and progression
                 <li>Pokédex flavor
+                <li>Keep cries for gen 1 mons
                 <li>idk, whatever you come up with?
             </ul>
         </div>
