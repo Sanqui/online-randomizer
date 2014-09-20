@@ -72,8 +72,8 @@ function set_preset(presetid) {
     preset = games[curgame].presets[presetid]
     console.log(preset)
     for (option in preset) {
-        if (preset[option] === true) {
-            $("#"+option).prop('checked', true)
+        if (preset[option] === true || preset[option] === false) {
+            $("#"+option).prop('checked', preset[option])
         } else {
             $("#"+option).val(preset[option])
         }
@@ -155,7 +155,7 @@ $(document).ready(function(){
                                 </div>
                             </div>
                         {% endif %}
-                        <form id="form-{{game.identifier}}">
+                        <form id="form-{{game.identifier}}" class="ui form">
                             <input type="hidden" name="game" value="{{game.identifier}}">
                             <dl>
                             {% for field in game.Form() %}
@@ -190,12 +190,14 @@ $(document).ready(function(){
                 <li>Other Gen 2-5 sprites done mostly by anons of /vp/.<br><small>See credits on <a href="http://www.tehowners.com/info/Non-Informative/Pokemon%20Sprites%20in%20Gen%201%20Style%20.png">this sheet</a>.  Please note that many of the sprites presented there are not in use.</small>
             </ul>
             <p>Huge thanks to everybody for their contributions!
+            <p><small>Not credited?  Please do let me know!</small>
         </div>
         <!--<div class="ui vertical divider"></div>-->
         <div class="column">
             <h3 class="ui header">Planned features!</h3>
             <ul>
                 <li>Randomize moves (for classic)
+                <li>Starter keeping his mon
                 <li>Randomize field items
                 <li>Yellow support
                 <li>Backsprites
