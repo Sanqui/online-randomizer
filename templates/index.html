@@ -129,7 +129,7 @@ $(document).ready(function(){
     <div class="main">
         <div class="ui label top right attached red big" style="font-weight:bold;">BETA</div>
         <!-- https://i.imgur.com/Z0k2D3y.png -->
-        <h1 class="logo"><img src="static/logos/0{{randlogo}}.png" alt="Online Randomizer"></h1>
+        <h1 class="logo"><img src="static/logos/{{'{:02}'.format(randlogo)}}.png" alt="Online Randomizer"></h1>
         <h2 class="ui header">Pick a game:</h2>
         <div id="games" class="ui buttons">
             {% for game in games %}
