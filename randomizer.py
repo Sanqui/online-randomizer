@@ -484,8 +484,6 @@ GrowthRateTable: ; 5901d (16:501d)
                     if level != 0 and randint(0, 1):
                         rom.write(chr(level))
                         rom.write(chr(choice(self.FAIR_MOVES)))
-            rom.writebyte(0) # end moves if pokémon, else end evos
-            rom.writebyte(0) # failsafe end
         assert rom.tell() < 0x3c000
         
         rom.seek(self.symbols["EvosMovesPointerTable"])
