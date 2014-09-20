@@ -513,7 +513,7 @@ GrowthRateTable: ; 5901d (16:501d)
             self.rom.writebyte( (menu_icons[dex[i*2]] << 4) | menu_icons[dex[i*2+1]])
         
         # Write palettes
-        self.rom.seek(self.symbols["MonsterPalettes"])
+        self.rom.seek(self.symbols["MonsterPalettes"]+1)
         for i in range(150):
             self.rom.writebyte(self.PALS[monpals[dex[i]-1]])
     opt_game_pokemon.layer = -1
