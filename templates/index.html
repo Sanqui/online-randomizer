@@ -127,7 +127,8 @@ $(document).ready(function(){
         <div class="ui label top right attached red" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;">NOT THE REAL THING!</div>
     {% endif %}
     <div class="main">
-        <h1 class="logo"><img src="https://i.imgur.com/Z0k2D3y.png" alt="Online Randomizer"></h1>
+        <!-- https://i.imgur.com/Z0k2D3y.png -->
+        <h1 class="logo"><img src="static/logos/0{{randlogo}}.png" alt="Online Randomizer"></h1>
         <h2 class="ui header">Pick a game:</h2>
         <div id="games" class="ui buttons">
             {% for game in games %}
@@ -208,6 +209,7 @@ $(document).ready(function(){
                 <li>Keep cries for gen 1 mons
                 <li>idk, whatever you come up with?
             </ul>
+            <p><a href="http://forums.pokemonspeedruns.com/viewtopic.php?f=85&p=3026">Thread on PSR</a>
         </div>
     </footer>
     <p>Randomizer by Sanqui aka Sanky.

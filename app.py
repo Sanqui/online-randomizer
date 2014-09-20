@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import time
+import random
 
 import json
 
@@ -51,7 +52,7 @@ def generate():
 
 @app.route("/")
 def index():
-    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug)
+    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug, randlogo=random.randint(1, 8))
 
 if __name__ == "__main__":
     print "Running..."
