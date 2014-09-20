@@ -125,6 +125,8 @@ $(document).ready(function(){
 <body>
     {% if debug %}
         <div class="ui label top right attached red" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;">NOT THE REAL THING!</div>
+    {% else %}
+        <div class="ui label top right attached yellow" style="">BETA</div>
     {% endif %}
     <div class="main">
         <!-- https://i.imgur.com/Z0k2D3y.png -->
@@ -195,6 +197,11 @@ $(document).ready(function(){
         </div>
         <!--<div class="ui vertical divider"></div>-->
         <div class="column">
+            <h3 class="ui header">Recommended GB emulators</h3>
+            <ul>
+                <li><a href="http://bgb.bircd.org/">bgb</a>
+                <li><a href="http://sourceforge.net/projects/gambatte/">gambatte</a>
+            </ul>
             <h3 class="ui header">Planned features!</h3>
             <ul>
                 <li>Randomize moves (for classic)

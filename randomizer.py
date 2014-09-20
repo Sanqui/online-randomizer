@@ -477,6 +477,8 @@ GrowthRateTable: ; 5901d (16:501d)
                         rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
                     elif trigger == 'use-item':
                         rom.write(chr(self.ITEMS.get(evolution['trigger_item'], self.ITEMS['moon-stone'])))
+                    elif trigger == 'trade':
+                        rom.writebyte(1)
                     rom.writebyte(self.POKEMON_MAPPINGS.index(1+dex.index(evolution['evolved_species'])))
                 rom.writebyte(0)
                 # moves
@@ -484,8 +486,7 @@ GrowthRateTable: ; 5901d (16:501d)
                     if level != 0 and randint(0, 1):
                         rom.write(chr(level))
                         rom.write(chr(choice(self.FAIR_MOVES)))
-            rom.writebyte(0) # end moves if pokémon, else end evos
-            rom.writebyte(0) # failsafe end
+                rom.writebyte(0) # end moves
         assert rom.tell() < 0x3c000
         
         rom.seek(self.symbols["EvosMovesPointerTable"])
