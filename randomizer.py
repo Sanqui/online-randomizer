@@ -102,7 +102,7 @@ class Game():
         
         original = open('roms/'+self.filename, 'rb').read()
         if filename:
-            filename = filename.replace('/', '_').replace('\0', '')
+            filename = filename.replace('/', '_').replace('\0', '').replace('?', '_')
             filename = "static/roms/"+filename
             while os.path.isfile(filename+'.gbc'):
                 filename += '_'
