@@ -152,6 +152,7 @@ class PokemonRed(Game):
         wild_pokemon = BooleanField("Randomize wild Pokémon")
         game_pokemon = BooleanField("Randomize Pokémon from all gens in")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average")
+        movesets = BooleanField("Randomize movesets")
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken")
         cries = BooleanField("Randomize Pokémon cries")
         tms = BooleanField("Randomize the moves TMs teach")
@@ -164,19 +165,19 @@ class PokemonRed(Game):
     presets = {
         'race': {
             'starter_pokemon': 'randomize',
-            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True,
+            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'casual': {
             'starter_pokemon': 'three-basic',
-            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True,
+            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'classic': {
             'starter_pokemon': 'randomize',
-            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False,
+            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'tms': True, 'field_items': '', 'update_types': False
         }
@@ -517,7 +518,44 @@ GrowthRateTable: ; 5901d (16:501d)
         for i in range(150):
             self.rom.writebyte(self.PALS[monpals[dex[i]-1]])
     opt_game_pokemon.layer = -1
-        
+    
+    def opt_movesets(self):
+        if self.choices['game_pokemon']: return
+        rom = self.rom
+        for i in range(150):
+            rom.seek(self.symbols["BulbasaurBaseStats"] + 15 + (28 * i))
+            # moves known at lv 0
+            moves = []
+            for i in range(4):
+                move = rom.readbyte()
+                if move != 0:
+                    move = choice(self.FAIR_MOVES)
+                    while move in moves:
+                        move = choice(self.FAIR_MOVES)
+                moves.append(move)
+            assert len(moves) == 4
+            rom.seek(rom.tell() - 4)
+            for move in moves:
+                rom.writebyte(move)
+            
+            rom.readbyte()
+            # tm/hm
+            for i in range(7):
+                rom.writebyte(randint(0, 255))
+            
+            rom.seek(self.symbols["EvosMovesPointerTable"] - 2 + (2 * self.POKEMON_MAPPINGS.index(1+i)))
+            rom.seek((self.symbols["EvosMovesPointerTable"] // 0x4000) * 0x4000 + (rom.readshort() % 0x4000))
+            # evolutions
+            while rom.readbyte() != 0: pass
+            # learnset
+            while True:
+                if rom.readbyte() == 0: break
+                move = choice(self.FAIR_MOVES)
+                while move in moves:
+                    move = choice(self.FAIR_MOVES)
+                moves.append(move)
+                rom.writebyte(move)
+    
     def opt_update_types(self):
         self.TYPES.update({'dark': 0x09, 'steel': 0x0a, 'fairy': 0x0b})
         types = self.TYPES
