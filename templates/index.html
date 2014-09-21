@@ -97,6 +97,10 @@ function generated(data) {
         $("#btn-generate").removeClass('loading')
         $("#btn-generate").show()
         $("#generating").html("Please wait " + Math.round(data.cooldown) + " more seconds before requesting a ROM.")
+    } else if (data.error == "filename") {
+        $("#btn-generate").removeClass('loading')
+        $("#btn-generate").show()
+        $("#generating").html("Filename too long, keep it to 64 characters please.")
     } else {
         $("#btn-generate").removeClass('loading')
         $("#btn-generate").show()
@@ -169,7 +173,7 @@ $(document).ready(function(){
                 {% endfor %}
             </div>
             <div id="controls" class="ui bottom attached header">
-                <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename">.gbc
+                <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename" maxlength="64">.gbc
                 <button id="btn-generate" class="ui button">Generate</button>
                 <div id="generating" style="display:none;"></div>
             </div>
