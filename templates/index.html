@@ -106,7 +106,8 @@ function generated(data) {
         $("#btn-generate").show()
         $("#btn-generate").text("Generate")
         $("#filename").val("")
-        $("#generating").html("Randomized ROM generated in "+ (Math.round(data.time*100)/100) +"s! <a href='"+data.filename+"'>Download</a><br>Link for sharing with friends:<br><code>http://sanqui.rustedlogic.net/randomizer/"+encodeURIComponent(data.filename).replace("%2F", "/").replace("%2F", "/")+"</code>")
+        url = encodeURIComponent(data.filename).replace("%2F", "/").replace("%2F", "/")
+        $("#generating").html("Randomized ROM generated in "+ (Math.round(data.time*100)/100) +"s! <a href='"+url+"'>Download</a><br>Link for sharing with friends:<br><code>http://sanqui.rustedlogic.net/randomizer/"+url+"</code>")
     }
 }
 function oops(x) {

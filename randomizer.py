@@ -156,6 +156,7 @@ class PokemonRed(Game):
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken")
         cries = BooleanField("Randomize Pokémon cries")
         tms = BooleanField("Randomize the moves TMs teach")
+        trainer_classes = BooleanField("Shuffle trainer classes")
         field_items = SelectField('Field items', choices=[('','-'),('shuffle','Shuffle')], default="")
     
         h_tweaks = Heading("Tweaks")
@@ -167,18 +168,21 @@ class PokemonRed(Game):
             'starter_pokemon': 'randomize',
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
+            'trainer_classes': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'casual': {
             'starter_pokemon': 'three-basic',
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
+            'trainer_classes': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'classic': {
             'starter_pokemon': 'randomize',
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
+            'trainer_classes': False,
             'tms': True, 'field_items': '', 'update_types': False
         }
     }
@@ -249,6 +253,8 @@ class PokemonRed(Game):
     KEY_ITEMS = [0x2B, 0x30, 0x3B, 0x40, 0x48, 0x4A, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8]
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
+    
+    TRAINER_CLASSES = ["YOUNGSTER", "BUG CATCHER", "LASS", "SAILOR", "JR.TRAINER♂", "JR.TRAINER♀", "POKéMANIAC", "SUPER NERD", "HIKER", "BIKER", "BURGLAR", "ENGINEER", "JUGGLER", "FISHERMAN", "SWIMMER", "CUE BALL", "GAMBLER", "BEAUTY", "PSYCHIC", "ROCKER", "JUGGLER", "TAMER", "BIRD KEEPER", "BLACKBELT", "RIVAL1", "PROF.OAK", "CHIEF", "SCIENTIST", "GIOVANNI", "ROCKET", "COOLTRAINER♂", "COOLTRAINER♀", "BRUNO", "BROCK", "MISTY", "LT.SURGE", "ERIKA", "KOGA", "BLAINE", "SABRINA", "GENTLEMAN", "RIVAL2", "RIVAL3", "LORELEI", "CHANNELER", "AGATHA", "LANCE"]
     
             
     
@@ -582,6 +588,26 @@ GrowthRateTable: ; 5901d (16:501d)
                 self.rom.write(chr({0:0x00, 50: 0x05, 200: 0x20}[factor]))
         self.rom.writebyte(0xff)
     opt_update_types.layer = -5
+        
+    def opt_trainer_classes(self):
+        classes = range(len(self.TRAINER_CLASSES))
+        shuffle(classes)
+        # TODO maybe TrainerClassMoveChoiceModifications ?
+        
+        class_data = []
+        self.rom.seek(self.symbols["TrainerPicAndMoneyPointers"])
+        for i in range(len(classes)):
+            class_data.append(self.rom.read(5))
+        
+        self.rom.seek(self.symbols["TrainerPicAndMoneyPointers"])
+        for c in classes:
+            self.rom.write(class_data[c])
+        
+        assert self.rom.tell() == self.symbols["TrainerNames"]
+        
+        for c in classes:
+            self.write_string(self.TRAINER_CLASSES[c])
+        
         
     def opt_instant_text(self):
         self.rom.seek(0x00ff)
