@@ -107,7 +107,7 @@ function generated(data) {
         $("#btn-generate").text("Generate")
         $("#filename").val("")
         url = encodeURIComponent(data.filename).replace("%2F", "/").replace("%2F", "/")
-        $("#generating").html("Randomized ROM generated in "+ (Math.round(data.time*100)/100) +"s! <a href='"+url+"'>Download</a><br>Link for sharing with friends:<br><code>http://sanqui.rustedlogic.net/randomizer/"+url+"</code>")
+        $("#generating").html("Randomized ROM generated in "+ (Math.round(data.time*100)/100) +"s! <a href='"+url+"' class='piwik_download'>Download</a><br>Link for sharing with friends:<br><code>http://sanqui.rustedlogic.net/randomizer/"+url+"</code>")
     }
 }
 function oops(x) {
@@ -194,7 +194,7 @@ $(document).ready(function(){
                 <li><a href="http://mylittlekeldeo.deviantart.com/">mylittlekeldeo</a>
                 <li><a href="http://sanqui.rustedlogic.net/">Sanqui</a>
                 <li><a href="http://solo993.deviantart.com/">solo993</a>
-                <li>Other Gen 2-5 sprites done mostly by anons of /vp/.<br><small>See credits on <a href="http://www.tehowners.com/info/Non-Informative/Pokemon%20Sprites%20in%20Gen%201%20Style%20.png">this sheet</a>.  Please note that many of the sprites presented there are not in use.</small>
+                <li>Other Gen 2-5 sprites done mostly by anons of /vp/ some time ago.<br><small>See credits on <a href="http://www.tehowners.com/info/Non-Informative/Pokemon%20Sprites%20in%20Gen%201%20Style%20.png">this sheet</a>.  Please note that many of the sprites presented there are not actually in use.</small>
             </ul>
             <p>Huge thanks to everybody for their contributions!
             <p><small>Not credited?  Please do let me know!</small>
