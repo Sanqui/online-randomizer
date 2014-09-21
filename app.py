@@ -55,7 +55,7 @@ def generate():
 
 @app.route("/")
 def index():
-    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug, randlogo=random.randint(1, 22))
+    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug, randlogo=random.randint(1, 28))
 
 if __name__ == "__main__":
     print "Running..."
