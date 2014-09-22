@@ -485,6 +485,7 @@ GrowthRateTable: ; 5901d (16:501d)
                         rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
                     elif trigger == 'use-item':
                         rom.write(chr(self.ITEMS.get(evolution['trigger_item'], self.ITEMS['moon-stone'])))
+                        rom.writebyte(1)
                     elif trigger == 'trade':
                         rom.writebyte(1)
                     rom.writebyte(self.POKEMON_MAPPINGS.index(1+dex.index(evolution['evolved_species'])))
