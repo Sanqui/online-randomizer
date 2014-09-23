@@ -147,11 +147,11 @@ class PokemonRed(Game):
     class Form(Form):
         h_randomize = Heading("Randomizations")
         
+        game_pokemon = BooleanField("Include Pokémon from all generations")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon")
         wild_pokemon = BooleanField("Randomize wild Pokémon")
         #ow_pokemon = BooleanField("Randomize gift and overworld Pokémon")
-        game_pokemon = BooleanField("Randomize Pokémon from all gens in")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average")
         movesets = BooleanField("Randomize movesets")
         tms = BooleanField("Randomize the moves TMs teach")
