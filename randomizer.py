@@ -150,12 +150,13 @@ class PokemonRed(Game):
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon")
         wild_pokemon = BooleanField("Randomize wild Pokémon")
+        #ow_pokemon = BooleanField("Randomize gift and overworld Pokémon")
         game_pokemon = BooleanField("Randomize Pokémon from all gens in")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average")
         movesets = BooleanField("Randomize movesets")
+        tms = BooleanField("Randomize the moves TMs teach")
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken")
         cries = BooleanField("Randomize Pokémon cries")
-        tms = BooleanField("Randomize the moves TMs teach")
         trainer_classes = BooleanField("Shuffle trainer classes")
         field_items = SelectField('Field items', choices=[('','-'),('shuffle','Shuffle')], default="")
     
@@ -165,21 +166,21 @@ class PokemonRed(Game):
     
     presets = {
         'race': {
-            'starter_pokemon': 'randomize',
+            'starter_pokemon': 'randomize', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'casual': {
-            'starter_pokemon': 'three-basic',
+            'starter_pokemon': 'three-basic', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'classic': {
-            'starter_pokemon': 'randomize',
+            'starter_pokemon': 'randomize', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'trainer_classes': False,
@@ -197,7 +198,16 @@ class PokemonRed(Game):
     STARTER_OFFESTS = [[0x1CC84, 0x1D10E, 0x1D126, 0x39CF8, 0x50FB3, 0x510DD],
 [0x1CC88, 0x1CDC8, 0x1D11F, 0x1D104, 0x19591, 0x50FAF, 0x510D9, 0x51CAF, 0x6060E, 0x61450, 0x75F9E],
 [0x1CDD0, 0x1D130, 0x1D115, 0x19599, 0x39CF2, 0x50FB1, 0x510DB, 0x51CB7, 0x60616, 0x61458, 0x75FA6]]
-
+    
+    #  Dabomstew: eevee, hitmonchan, hitmonlee, 6 voltorbs, 2 electrodes, legendary birds, mewtwo, 2 snorlaxes, aerodactyl, omanyte, kabuto, lapras, magikarp, 6 game corner pokemon
+    GIFT_POKEMON_ADDRESSES = [symbols['CeladonMansion5Text2']+3, symbols['FightingDojoText6']+18, symbols['FightingDojoText7']+18,
+        ] + [symbols['PowerPlantObject'] + 22 + 8*i  for i in range(9)] + [
+        symbols['SeafoamIslands5Object'] + 45, symbols['VictoryRoad2Object'] + 79, symbols['UnknownDungeon3Object'] + 15,
+        symbols['Route12Script0'] + 25, symbols['Route16Script0'] + 25, 
+        symbols['GiveFossilToCinnabarLab'] + 0x5e, symbols['GiveFossilToCinnabarLab'] + 0x62, symbols['GiveFossilToCinnabarLab'] + 0x66,
+        symbols['SilphCo7Text1'] + 0x1f, symbols['MtMoonPokecenterText4'] + 0x34]
+    
+    
     EVOLUTION_METHODS = {'level-up': 1, 'use-item': 2, 'trade': 3}
 
     TYPES = {'normal': 0x00, 'fighting': 0x01, 'flying': 0x02, 'poison': 0x03, 'ground': 0x04,
@@ -608,7 +618,22 @@ GrowthRateTable: ; 5901d (16:501d)
         
         for c in classes:
             self.write_string(self.TRAINER_CLASSES[c])
+    
+    def opt_ow_pokemon(self):
+        rom = self.rom
+        for address in self.GIFT_POKEMON_ADDRESSES:
+            self.rom.seek(address)
+            self.rom.writebyte(choice(self.POKEMON))
+        prizemons = sample(self.POKEMON, 6)
+        for j in range(2):
+            rom.seek(self.symbols['PrizeMenuMon{}Entries'.format(j+1)])
+            for i in range(3):
+                rom.writebyte(prizemons[j*3 + i])
         
+        rom.seek(self.symbols['PrizeMonLevelDictionary'])
+        for prizemon in prizemons:
+            rom.writebyte(prizemon)
+            rom.readbyte()
         
     def opt_instant_text(self):
         self.rom.seek(0x00ff)

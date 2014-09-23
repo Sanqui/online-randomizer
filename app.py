@@ -60,7 +60,7 @@ def index():
 if __name__ == "__main__":
     print "Running..."
     debug = True
-    app.run(host="", port=8080, debug=True, threaded=True)
+    app.run(host="", port=8080, debug=True, threaded=True, use_evalex=False)
 
 if not app.debug:
     import logging
