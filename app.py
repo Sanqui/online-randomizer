@@ -27,6 +27,12 @@ cooldowns = {}
 
 @app.route('/generate', methods=["POST"])
 def generate():
+    # For some reason, in case we've never touched the request, outgoing JSON
+    # replies (such as a cooldown one) send zero-byte replies.  This only
+    # happens on the deployed uWSGI server and not Flask's internal debugging
+    # one.
+    request.form.get('randomizer') 
+    
     ip = request.remote_addr
     if ip in cooldowns and time.time() < cooldowns[ip] + 60:
         return jsonify({'error': 'cooldown', 'cooldown': (cooldowns[ip] + 60) - time.time()})

@@ -111,7 +111,7 @@ class Game():
         else:
             filename = "static/roms/"+datetime.datetime.now().strftime("%Y%m%dT%H%M%S_")+self.filename
             while os.path.isfile(filename):
-                filename = filename.strip('.')
+                filename = filename.split('.')
                 filename[-2] += '_'
                 filename = filename.join('.')
         self.rom = ROM(filename, 'w+b')
