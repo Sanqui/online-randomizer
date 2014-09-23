@@ -93,14 +93,14 @@ function generate() {
 
 function generated(data) {
     generating = false
-    if (data.cooldown) {
+    if (data.error) {
         $("#btn-generate").removeClass('loading')
         $("#btn-generate").show()
-        $("#generating").html("Please wait " + Math.round(data.cooldown) + " more seconds before requesting a ROM.")
-    } else if (data.error == "filename") {
-        $("#btn-generate").removeClass('loading')
-        $("#btn-generate").show()
-        $("#generating").html("Filename too long, keep it to 64 characters please.")
+        if (data.error == "cooldown") {
+            $("#generating").html("Please wait " + Math.round(data.cooldown) + " more seconds before requesting a ROM.")
+        } else if (data.error == "filename") {
+            $("#generating").html("Filename too long, keep it to 64 characters please.")
+        }
     } else {
         $("#btn-generate").removeClass('loading')
         $("#btn-generate").show()

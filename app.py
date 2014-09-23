@@ -29,7 +29,7 @@ cooldowns = {}
 def generate():
     ip = request.remote_addr
     if ip in cooldowns and time.time() < cooldowns[ip] + 60:
-        return jsonify({'cooldown': (cooldowns[ip] + 60) - time.time()})
+        return jsonify({'error': 'cooldown', 'cooldown': (cooldowns[ip] + 60) - time.time()})
     if len(request.form.get('filename')) > 64:
         return jsonify({'error': 'filename'})
     
