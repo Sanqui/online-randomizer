@@ -154,6 +154,7 @@ class PokemonRed(Game):
         #ow_pokemon = BooleanField("Randomize gift and overworld Pokémon")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average")
         movesets = BooleanField("Randomize movesets")
+        force_attacking = BooleanField("Always start with an attacking move")
         tms = BooleanField("Randomize the moves TMs teach")
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken")
         cries = BooleanField("Randomize Pokémon cries")
@@ -169,20 +170,23 @@ class PokemonRed(Game):
         'race': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
+            'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
-            'trainer_classes': True,
+            'trainer_classes': True, 'ow_sprites': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'casual': {
             'starter_pokemon': 'three-basic', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
+            'force_attacking': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
-            'trainer_classes': True,
+            'trainer_classes': True, 'ow_sprites': True,
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'classic': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
+            'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'trainer_classes': False,
             'tms': True, 'field_items': '', 'update_types': False
@@ -222,6 +226,7 @@ class PokemonRed(Game):
              
     MAXMOVE = 0xa4 # substitute
     FAIR_MOVES = set(range(1, MAXMOVE+1)) - {144} # +1 ? # transform
+    ATTACKING_MOVES = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0d, 0x0f, 0x10, 0x11, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x28, 0x29, 0x2a, 0x2c, 0x31, 0x32, 0x33, 0x34, 0x35, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x4b, 0x4c, 0x50, 0x52, 0x53, 0x54, 0x55, 0x57, 0x58, 0x59, 0x5b, 0x5d, 0x5e, 0x62, 0x63, 0x65, 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f, 0x80, 0x81, 0x82, 0x83, 0x84, 0x88, 0x8c, 0x8d, 0x8f, 0x91, 0x92, 0x95, 0x98, 0x9a, 0x9b, 0x9d, 0x9e, 0xa1, 0xa3}
     
     DEX_FAMILIES = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30, 31], [32, 33, 34], [35, 36], [37, 38], [39, 40], [41, 42], [43, 44, 45], [46, 47], [48, 49], [50, 51], [52, 53], [54, 55], [56, 57], [58, 59], [60, 61, 62], [63, 64, 65], [66, 67, 68], [69, 70, 71], [72, 73], [74, 75, 76], [77, 78], [79, 80], [81, 82], [83], [84, 85], [86, 87], [88, 89], [90, 91], [92, 93, 94], [95], [96, 97], [98, 99], [100, 101], [102, 103], [104, 105], [106, 107], [108], [109, 110], [111, 112], [113], [114], [115], [116, 117], [118, 119], [120, 121], [122], [123], [124], [125], [126], [127], [128], [129, 130], [131], [132], [133, 134, 135, 136], [137], [138, 139], [140, 141], [142], [143], [144], [145], [146], [147, 148, 149], [150], [151]]
     DEX = range(1, 152)
@@ -276,8 +281,10 @@ class PokemonRed(Game):
     def opt_move_rules(self, rule):
         if rule in ('no-hms', 'no-hms-broken'):
             self.FAIR_MOVES -= {57, 70, 19, 15, 148}
+            self.ATTACKING_MOVES -= {57, 70, 19, 15, 148}
         if rule in ('no-broken', 'no-hms-broken'):
             self.FAIR_MOVES -= {0x52, 0x93} # Dragon Rage, Spore
+            self.ATTACKING_MOVES -= {0x52, 0x93} # Dragon Rage, Spore
         return
     opt_move_rules.layer = -5
     
@@ -449,7 +456,10 @@ class PokemonRed(Game):
             moves = [0, 0, 0, 0]
             num_moves = sum([level == 1 for level in data['moveset']])
             for movei in range(min(num_moves, 4)):
-                move = choice(self.FAIR_MOVES)
+                if movei == 0 and self.choices['force_attacking']:
+                    move = choice(self.ATTACKING_MOVES)
+                else:
+                    move = choice(self.FAIR_MOVES)
                 while move in moves:
                     move = choice(self.FAIR_MOVES)
                 moves[movei] = move
@@ -547,7 +557,10 @@ GrowthRateTable: ; 5901d (16:501d)
             for i in range(4):
                 move = rom.readbyte()
                 if move != 0:
-                    move = choice(self.FAIR_MOVES)
+                    if i == 0 and self.choices['force_attacking']:
+                        move = choice(self.ATTACKING_MOVES)
+                    else:
+                        move = choice(self.FAIR_MOVES)
                     while move in moves:
                         move = choice(self.FAIR_MOVES)
                 moves.append(move)
