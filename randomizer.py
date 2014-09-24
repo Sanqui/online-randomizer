@@ -158,6 +158,7 @@ class PokemonRed(Game):
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken")
         cries = BooleanField("Randomize Pokémon cries")
         trainer_classes = BooleanField("Shuffle trainer classes")
+        ow_sprites = BooleanField("Shuffle overworld sprites")
         field_items = SelectField('Field items', choices=[('','-'),('shuffle','Shuffle')], default="")
     
         h_tweaks = Heading("Tweaks")
@@ -266,7 +267,7 @@ class PokemonRed(Game):
     
     TRAINER_CLASSES = ["YOUNGSTER", "BUG CATCHER", "LASS", "SAILOR", "JR.TRAINER♂", "JR.TRAINER♀", "POKéMANIAC", "SUPER NERD", "HIKER", "BIKER", "BURGLAR", "ENGINEER", "JUGGLER", "FISHERMAN", "SWIMMER", "CUE BALL", "GAMBLER", "BEAUTY", "PSYCHIC", "ROCKER", "JUGGLER", "TAMER", "BIRD KEEPER", "BLACKBELT", "RIVAL1", "PROF.OAK", "CHIEF", "SCIENTIST", "GIOVANNI", "ROCKET", "COOLTRAINER♂", "COOLTRAINER♀", "BRUNO", "BROCK", "MISTY", "LT.SURGE", "ERIKA", "KOGA", "BLAINE", "SABRINA", "GENTLEMAN", "RIVAL2", "RIVAL3", "LORELEI", "CHANNELER", "AGATHA", "LANCE"]
     
-            
+    OW_SPRITES = "red blue oak bug_catcher slowbro lass black_hair_boy_1 little_girl bird fat_bald_guy gambler black_hair_boy_2 girl hiker foulard_woman gentleman daisy biker sailor cook bike_shop_guy mr_fuji giovanni rocket medium waiter erika mom_geisha brunette_girl lance oak_aide oak_aide rocker swimmer white_player gym_helper old_person mart_guy fisher old_medium_woman nurse cable_club_woman mr_masterball lapras_giver warden ss_captain fisher2 blackbelt guard mom balding_guy young_boy gameboy_kid gameboy_kid clefairy agatha bruno lorelei seel".split()
     
     def random_pokemon(self):
         return choice(self.POKEMON)
@@ -634,7 +635,25 @@ GrowthRateTable: ; 5901d (16:501d)
         for prizemon in prizemons:
             rom.writebyte(prizemon)
             rom.readbyte()
+    
+    def opt_ow_sprites(self):
+        # 59 sprites total, 0x180 bytes per sprite, 42 fit in one bank
+        locs = {}
+        for bank, sprites in ((0x3e, self.OW_SPRITES[:42]), (0x3f, self.OW_SPRITES[42:])):
+            self.rom.seek(0x3f * 0x4000)
+            for sprite in sprites:
+                locs[sprite] = self.rom.tell()
+                self.rom.write(open('gfx/ow_sprites/{}.2bpp'.format(sprite)).read())
+        assert self.rom.tell() <= 0x40 * 0x4000
         
+        self.rom.seek(self.symbols['SpriteSheetPointerTable'])
+        sprites = self.OW_SPRITES
+        shuffle(sprites)
+        for sprite in sprites:
+            self.rom.writeshort(locs[sprite] % 0x4000 + 0x4000)
+            self.rom.writebyte(0xc0)
+            self.rom.writebyte(locs[sprite] // 0x4000)
+    
     def opt_instant_text(self):
         self.rom.seek(0x00ff)
         self.rom.writebyte(0x01) # bit 0 but i have no other stuff yet
