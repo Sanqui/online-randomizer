@@ -51,7 +51,7 @@ var curgame
 var generating = false
 var options_showed = false
 
-function render_options(gameid) {
+function render_options(gameid, instant=false) {
     console.log(gameid)
     curgame = gameid
     for (gameid_ in games) {
@@ -60,14 +60,21 @@ function render_options(gameid) {
     //$("#options").show()
     //$("#options_controls").show()
     //$("#controls").show()
-    if (!options_showed) {
-        $("#randomizer_options").fadeIn(1000)
+    if (instant) {
+        $("#randomizer_options").show()
         $("#options-"+gameid).show()
         options_showed = true
+    } else {
+        if (!options_showed) {
+            $("#randomizer_options").fadeIn(1000)
+            $("#options-"+gameid).show()
+            options_showed = true
+        }
+        else {
+            $("#options-"+gameid).fadeIn(500)
+        }
     }
-    else {
-        $("#options-"+gameid).fadeIn(500)
-    }
+    window.location.hash = curgame
 }
 
 function set_preset(presetid) {
@@ -127,6 +134,10 @@ $(document).ready(function(){
     $('#btn-select-all').click(function() { $('#options input').prop('checked', true)})
     $('#btn-select-none').click(function() { $('#options input').prop('checked', false)})
     $('#btn-generate').click(generate)
+    
+    if (window.location.hash) {
+        render_options(window.location.hash.substr(1), instant=true)
+    }
 })
     </script>
 </head>
