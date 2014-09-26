@@ -51,7 +51,7 @@ var curgame
 var generating = false
 var options_showed = false
 
-function render_options(gameid, instant=false) {
+function render_options(gameid, instant) {
     console.log(gameid)
     curgame = gameid
     for (gameid_ in games) {
@@ -126,7 +126,7 @@ function oops(x) {
 
 $(document).ready(function(){
     for (gameid in games) {
-        $('#btn-'+gameid).click(function() {render_options(this.getAttribute('data-game')) })
+        $('#btn-'+gameid).click(function() {render_options(this.getAttribute('data-game'), false) })
         for (presetid in games[gameid].presets) {
             $('#btn-preset-'+presetid).click(function() {set_preset(this.getAttribute('data-preset')) })
         }
@@ -136,7 +136,7 @@ $(document).ready(function(){
     $('#btn-generate').click(generate)
     
     if (window.location.hash) {
-        render_options(window.location.hash.substr(1), instant=true)
+        render_options(window.location.hash.substr(1), true)
     }
 })
     </script>
