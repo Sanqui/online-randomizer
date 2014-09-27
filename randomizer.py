@@ -160,7 +160,7 @@ class PokemonRed(Game):
         cries = BooleanField("Randomize Pokémon cries")
         trainer_classes = BooleanField("Shuffle trainer classes")
         ow_sprites = BooleanField("Shuffle overworld sprites")
-        field_items = SelectField('Field items', choices=[('','-'),('shuffle','Shuffle')], default="")
+        field_items = SelectField('Field items', choices=dechoices(":-;shuffle:Shuffle;shuffle-no-tm:Shuffle, keep TMs"), default="")
     
         h_tweaks = Heading("Tweaks")
         update_types = BooleanField("Update types to X/Y")
@@ -173,7 +173,7 @@ class PokemonRed(Game):
             'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True,
-            'tms': True, 'field_items': 'shuffle', 'update_types': True
+            'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True
         },
         'casual': {
             'starter_pokemon': 'three-basic', 'ow_pokemon': True,
@@ -341,7 +341,7 @@ class PokemonRed(Game):
         items = []
         addresses = []
         for address, item in self.FIELD_ITEMS:
-            if item not in self.KEY_ITEMS:
+            if item not in self.KEY_ITEMS + range(0xc4, 0xfb) if mode == "shuffle-no-tm" else []:
                 items.append(item)
                 addresses.append(address)
         
@@ -652,7 +652,7 @@ GrowthRateTable: ; 5901d (16:501d)
     def opt_ow_sprites(self):
         # 59 sprites total, 0x180 bytes per sprite, 42 fit in one bank
         locs = {}
-        for bank, sprites in ((0x3e, self.OW_SPRITES[:42]), (0x3f, self.OW_SPRITES[42:])):
+        for bank, sprites in ((0x3a, self.OW_SPRITES[:42]), (0x3b, self.OW_SPRITES[42:])):
             self.rom.seek(0x3f * 0x4000)
             for sprite in sprites:
                 locs[sprite] = self.rom.tell()
