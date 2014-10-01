@@ -148,6 +148,7 @@ class PokemonRed(Game):
         h_randomize = Heading("Randomizations")
         
         game_pokemon = BooleanField("Include Pokémon from all generations")
+        backsprites = SelectField('Backsprites for new Pokémon', choices=dechoices("front:Flipped frontsprites;back:Backsprites where available"), default="back")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon")
         wild_pokemon = BooleanField("Randomize wild Pokémon")
@@ -172,7 +173,7 @@ class PokemonRed(Game):
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
-            'trainer_classes': True, 'ow_sprites': True,
+            'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True
         },
         'casual': {
@@ -180,7 +181,7 @@ class PokemonRed(Game):
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'force_attacking': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
-            'trainer_classes': True, 'ow_sprites': True,
+            'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle', 'update_types': True
         },
         'classic': {
@@ -402,7 +403,7 @@ class PokemonRed(Game):
             sprites = b""
             sprites += open('sprites/{:03}.pic'.format(num)).read()
             addresses.append((banki, len(bank)+len(sprites)))
-            sprites += open('backsprites/{:03}.pic'.format(num)).read()
+            sprites += open('backsprites{}/{:03}.pic'.format("_" if self.choices['backsprites']=="back" else "", num)).read()
             if len(bank + sprites) < 0x4000:
                 bank += sprites
                 pokemon_sprite_addresses.append(addresses)
