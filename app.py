@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import time
+from datetime import datetime
 import random
 
 import json
@@ -9,7 +10,18 @@ from flask import render_template, jsonify, request
 app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = '/randomizer'
 
+@app.template_filter('datetime')
+def datetime_format(value, format='%Y-%m-%d  %H:%M'):
+    if not value: return "-"
+    if isinstance(value, unicode): return value
+    if isinstance(value, int): value = datetime.fromtimestamp(value)
+    return value.strftime(format)
+
 debug = False
+
+from git import *
+repo = Repo(".")
+assert repo.bare == False
 
 import randomizer
 
@@ -61,7 +73,14 @@ def generate():
 
 @app.route("/")
 def index():
-    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug, randlogo=random.randint(1, 28))
+    all_commits = repo.iter_commits('master')
+    commits = []
+    for commit in all_commits:
+        if not commit.message.startswith('Merge '):
+            commits.append(commit)
+        if len(commits) == 10: break
+    
+    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug, randlogo=random.randint(1, 28), commits=commits)
 
 if __name__ == "__main__":
     print "Running..."
