@@ -429,7 +429,7 @@ class PokemonRed(Game):
         print "Wrote sprites (last bank: {})".format(hex(banki))
         
         # base stats
-        self.rom.seek(self.symbols["BulbasaurBaseStats"]) # BulbasaurBaseStats
+        self.rom.seek(self.symbols["BaseStats"]) # BulbasaurBaseStats
         for i, mon in enumerate(dex):
             data = minidex['pokemon'][mon]
             rom.read(1)
