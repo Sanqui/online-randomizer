@@ -223,6 +223,12 @@ $(document).ready(function(){
         </div>
         <!--<div class="ui vertical divider"></div>-->
         <div class="column">
+            <h3 class="ui header">Rudimentary changelog</h3>
+            <ul>
+                {% for commit in commits %}
+                    <li><strong>{{ commit.authored_date | datetime }}</strong><br>{{ commit.message }}
+                {% endfor %}
+            </ul>
             <h3 class="ui header">Recommended GB emulators</h3>
             <ul>
                 <li><a href="http://bgb.bircd.org/">bgb</a>
