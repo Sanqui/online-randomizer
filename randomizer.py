@@ -164,6 +164,7 @@ class PokemonRed(Game):
         field_items = SelectField('Field items', choices=dechoices(":-;shuffle:Shuffle;shuffle-no-tm:Shuffle, keep TMs"), default="", description="This option randomizes what you can find lying on the ground.")
     
         h_tweaks = Heading("Tweaks")
+        change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
         update_types = BooleanField("Update types to X/Y", description="This uption updates the whole type table to Gen 6's, including the new types.  If you don't choose this, types that didn't exist in Gen 1 become Normal.")
         instant_text = BooleanField("Instant text speed", description="This makes all dialogue display instantly, instead of delaying after each letter.")
     
@@ -171,7 +172,7 @@ class PokemonRed(Game):
         'race': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
-            'force_attacking': True,
+            'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True
@@ -179,7 +180,7 @@ class PokemonRed(Game):
         'casual': {
             'starter_pokemon': 'three-basic', 'ow_pokemon': True,
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
-            'force_attacking': True,
+            'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle', 'update_types': True
@@ -502,6 +503,10 @@ GrowthRateTable: ; 5901d (16:501d)
                 # evolutions
                 for evolution in minidex['pokemon'][num]['evolutions']:
                     trigger = {'shed': 'level-up'}.get(evolution['trigger'], evolution['trigger'])
+                    if self.choices['change_trade_evos']:
+                        trigger = 'level-up'
+                        evolution['minimum_level'] = 42
+                    
                     rom.write(chr(self.EVOLUTION_METHODS[trigger]))
                     if trigger == 'level-up':
                         rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
