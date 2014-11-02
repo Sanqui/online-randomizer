@@ -503,7 +503,7 @@ GrowthRateTable: ; 5901d (16:501d)
                 # evolutions
                 for evolution in minidex['pokemon'][num]['evolutions']:
                     trigger = {'shed': 'level-up'}.get(evolution['trigger'], evolution['trigger'])
-                    if self.choices['change_trade_evos']:
+                    if trigger == "trade" and self.choices['change_trade_evos']:
                         trigger = 'level-up'
                         evolution['minimum_level'] = 42
                     
