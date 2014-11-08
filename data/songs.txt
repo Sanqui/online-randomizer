@@ -1,0 +1,46 @@
+Nothing
+RBYPalletTown PalletTown NewBarkTown
+Pokecenter PokemonCenter MobileCenter
+RBYGym Gym
+Cities1 ViridianCity CherrygroveCity
+Cities2 AzaleaTown CeruleanGSC
+Celadon CeladonCity GoldenrodCity
+Cinnabar CinnabarGSC CinnabarRemix
+Vermilion VermilionCity VioletCity
+Lavender LavenderTown EcruteakCity
+SSAnne SSAqua
+MeetProfOak ProfOak
+MeetRival LookRival TCGRonald
+MuseumGuy ShowMeAround
+SafariZone Evolution
+PkmnHealed HealPokemon
+Routes1 Route1 Route29
+Routes2 Route3 Route30 NuggetBridge
+Routes3 Route12 Route36 Route206
+Routes4 Route26 Route37
+RBYIndigoPlateau IndigoPlateau
+GymLeaderBattle KantoGymBattle JohtoGymBattle KantoGymLeaderRemix NaljoGymBattle
+TrainerBattle KantoTrainerBattle JohtoTrainerBattle RivalBattle RocketBattle JohtoGSC SinnohTrainerBattle
+WildBattle KantoWildBattle JohtoWildBattle JohtoWildBattleNight SinnohWildBattle NaljoWildBattle
+FinalBattle ChampionBattle
+DefeatedTrainer TrainerVictory
+DefeatedWildMon WildPokemonVictory
+DefeatedGymLeader GymLeaderVictory
+RBYTitleScreen TitleScreen TCGTitleScreen TCG2TitleScreen Pinballtitlescreen
+RBYCredits Credits TCGCredits TCG2Credits Pinballendcredits
+RBYHallOfFame HallOfFame TCGHallOfHonor Pinballnameentry
+OaksLab ElmsLab ProfOaksPokemonTalk
+JigglypuffSong
+BikeRiding Bicycle
+Surfing Surf Pinballseelstage
+RBYGameCorner GameCorner TCG2GameCorner
+IntroBattle GoldSilverOpening2
+Dungeon1 Route2 SproutTower
+Dungeon2 MtMoon UnionCave DarkCave
+Dungeon3 RocketHideout
+CinnabarMansion BurnedTower
+PokemonTower TinTower
+SilphCo RocketTheme TCG2HereComesGR
+MeetEvilTrainer LookRocket LookPokemaniac LookSage
+MeetFemaleTrainer LookBeauty LookLass
+MeetMaleTrainer LookYoungster LookHiker LookOfficer

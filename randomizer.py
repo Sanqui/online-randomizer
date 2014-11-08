@@ -140,7 +140,7 @@ class Game():
 @games.append
 class PokemonRed(Game):
     name = "Pokémon Red"
-    filename = "pokered.gb" # randomizer rom with some different offsets
+    filename = "pokered.gbc" # randomizer rom with some different offsets
     identifier = "pokered"
     symbols = symfile("roms/pokered.sym")
     
@@ -162,6 +162,7 @@ class PokemonRed(Game):
         trainer_classes = BooleanField("Shuffle trainer classes", description="This affects payouts too, but not AI.")
         ow_sprites = BooleanField("Shuffle overworld sprites", description="This is purely visual and for fun.")
         field_items = SelectField('Field items', choices=dechoices(":-;shuffle:Shuffle;shuffle-no-tm:Shuffle, keep TMs"), default="", description="This option randomizes what you can find lying on the ground.")
+        soundtrack = BooleanField("Randomize the soundtrack", description="Picks random fitting songs for each song in Red from GSC, TCG, Pinball and a few demixes.  There'll be an option to narrow it down soon.  Purely aural.")
     
         h_tweaks = Heading("Tweaks")
         change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
@@ -175,7 +176,8 @@ class PokemonRed(Game):
             'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
-            'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True
+            'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True,
+            'soundtrack': True
         },
         'casual': {
             'starter_pokemon': 'three-basic', 'ow_pokemon': True,
@@ -183,7 +185,8 @@ class PokemonRed(Game):
             'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
-            'tms': True, 'field_items': 'shuffle', 'update_types': True
+            'tms': True, 'field_items': 'shuffle', 'update_types': True,
+            'soundtrack': True
         },
         'classic': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True,
@@ -202,9 +205,9 @@ class PokemonRed(Game):
     
     POKEMON_MAPPINGS = [None, 112, 115, 32, 35, 21, 100, 34, 80, 2, 103, 108, 102, 88, 94, 29, 31, 104, 111, 131, 59, 151, 130, 90, 72, 92, 123, 120, 9, 127, 114, None, None, 58, 95, 22, 16, 79, 64, 75, 113, 67, 122, 106, 107, 24, 47, 54, 96, 76, None, 126, None, 125, 82, 109, None, 56, 86, 50, 128, None, None, None, 83, 48, 149, None, None, None, 84, 60, 124, 146, 144, 145, 132, 52, 98, None, None, None, 37, 38, 25, 26, None, None, 147, 148, 140, 141, 116, 117, None, None, 27, 28, 138, 139, 39, 40, 133, 136, 135, 134, 66, 41, 23, 46, 61, 62, 13, 14, 15, None, 85, 57, 51, 49, 87, None, None, 10, 11, 12, 68, None, 55, 97, 42, 150, 143, 129, None, None, 89, None, 99, 91, None, 101, 36, 110, 53, 105, None, 93, 63, 65, 17, 18, 121, 1, 3, 73, None, 118, 119, None, None, None, None, 77, 78, 19, 20, 33, 30, 74, 137, 142, None, 81, None, None, 4, 7, 5, 8, 6, None, None, None, None, 43, 44, 45, 69, 70, 71]
     
-    STARTER_OFFESTS = [[0x1CC84, 0x1D10E, 0x1D126, 0x39CF8, 0x50FB3, 0x510DD],
-[0x1CC88, 0x1CDC8, 0x1D11F, 0x1D104, 0x19591, 0x50FAF, 0x510D9, 0x51CAF, 0x6060E, 0x61450, 0x75F9E],
-[0x1CDD0, 0x1D130, 0x1D115, 0x19599, 0x39CF2, 0x50FB1, 0x510DB, 0x51CB7, 0x60616, 0x61458, 0x75FA6]]
+    STARTER_OFFESTS = [[symbols['OaksLabScript8'] + 0x4, symbols['OaksLabText2'] + 0xc, symbols['OaksLabText4'] + 0x2, symbols['ReadTrainer'] + 0xa5, symbols['StarterMons_50faf'] + 0x4, symbols['StarterMons_510d9'] + 0x4],
+[symbols['OaksLabScript8'] + 0x8, symbols['OaksLabScript11'] + 0xf, symbols['OaksLabText3'] + 0xc, symbols['OaksLabText2'] + 0x2, symbols['CeruleanCityScript1'] + 0x2a, symbols['StarterMons_50faf'] + 0x0, symbols['StarterMons_510d9'] + 0x0, symbols['SilphCo7Script3'] + 0x2d, symbols['PokemonTower2Text1'] + 0x2f, symbols['SSAnne2Script1'] + 0x20, symbols['GaryScript2'] + 0x34],
+[symbols['OaksLabScript11'] + 0x17, symbols['OaksLabText4'] + 0xc, symbols['OaksLabText3'] + 0x2, symbols['CeruleanCityScript1'] + 0x32, symbols['ReadTrainer'] + 0x9f, symbols['StarterMons_50faf'] + 0x2, symbols['StarterMons_510d9'] + 0x2, symbols['SilphCo7Script3'] + 0x35, symbols['PokemonTower2Text1'] + 0x37, symbols['SSAnne2Script1'] + 0x28, symbols['GaryScript2'] + 0x3c]]
     
     #  Dabomstew: eevee, hitmonchan, hitmonlee, 6 voltorbs, 2 electrodes, legendary birds, mewtwo, 2 snorlaxes, aerodactyl, omanyte, kabuto, lapras, magikarp, 6 game corner pokemon
     GIFT_POKEMON_ADDRESSES = [symbols['CeladonMansion5Text2']+3, symbols['FightingDojoText6']+18, symbols['FightingDojoText7']+18,
@@ -236,6 +239,8 @@ class PokemonRed(Game):
     OBJECT_MAPS = "CeladonCity PalletTown ViridianCity PewterCity CeruleanCity VermilionCity FuchsiaCity BluesHouse VermilionHouse3 IndigoPlateauLobby SilphCo4 SilphCo5 SilphCo6 CinnabarIsland Route1 OaksLab ViridianMart School ViridianHouse PewterHouse1 PewterHouse2 CeruleanHouseTrashed CeruleanHouse1 BikeShop LavenderHouse1 LavenderHouse2 NameRater VermilionHouse1 VermilionDock CeladonMansion5 FuchsiaMart SaffronHouse1 SaffronHouse2 DiglettsCaveRoute2 Route2House Route5Gate Route6Gate Route7Gate Route8Gate UndergroundPathEntranceRoute8 PowerPlant DiglettsCaveEntranceRoute11 Route16House Route22Gate BillsHouse LavenderTown ViridianPokecenter Mansion1 RockTunnel1 SeafoamIslands1 SSAnne3 VictoryRoad3 RocketHideout1 RocketHideout2 RocketHideout3 RocketHideout4 RocketHideoutElevator SilphCoElevator SafariZoneEast SafariZoneNorth SafariZoneCenter SafariZoneRestHouse1 SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 UnknownDungeon2 UnknownDungeon3 RockTunnel2 SeafoamIslands2 SeafoamIslands3 SeafoamIslands4 SeafoamIslands5 Route7 RedsHouse1F CeladonMart3 CeladonMart4 CeladonMartRoof CeladonMartElevator CeladonMansion1 CeladonMansion2 CeladonMansion3 CeladonMansion4 CeladonPokecenter CeladonGym CeladonGameCorner CeladonMart5 CeladonPrizeRoom CeladonDiner CeladonHouse CeladonHotel MtMoonPokecenter RockTunnelPokecenter Route11Gate Route11GateUpstairs Route12Gate Route12GateUpstairs Route15Gate Route15GateUpstairs Route16Gate Route16GateUpstairs Route18Gate Route18GateUpstairs MtMoon1 MtMoon3 SafariZoneWest SafariZoneSecretHouse BattleCenterM TradeCenterM Route22 Route20 Route23 Route24 Route25 IndigoPlateau SaffronCity VictoryRoad2 MtMoon2 SilphCo7 Mansion2 Mansion3 Mansion4 Route2 Route3 Route4 Route5 Route9 Route13 Route14 Route17 Route19 Route21 VermilionHouse2 CeladonMart2 FuchsiaHouse3 DayCareM Route12House SilphCo8 Route6 Route8 Route10 Route11 Route12 Route15 Route16 Route18 FanClub SilphCo2 SilphCo3 SilphCo10 Lance HallofFameRoom RedsHouse2F Museum1F Museum2F PewterGym PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter LavenderMart VermilionPokecenter VermilionMart VermilionGym CopycatsHouse2F FightingDojo SaffronGym SaffronMart SilphCo1 SaffronPokecenter ViridianForestExit Route2Gate ViridianForestEntrance UndergroundPathEntranceRoute5 UndergroundPathEntranceRoute6 UndergroundPathEntranceRoute7 UndergroundPathEntranceRoute7Copy SilphCo9 VictoryRoad1 PokemonTower1 PokemonTower2 PokemonTower3 PokemonTower4 PokemonTower5 PokemonTower6 PokemonTower7 CeladonMart1 ViridianForest SSAnne1 SSAnne2 SSAnne4 SSAnne5 SSAnne6 SSAnne7 SSAnne8 SSAnne9 SSAnne10 UndergroundPathNS UndergroundPathWE DiglettsCave SilphCo11 ViridianGym PewterMart UnknownDungeon1 CeruleanHouse2 FuchsiaHouse1 FuchsiaPokecenter FuchsiaHouse2 SafariZoneEntrance FuchsiaGym FuchsiaMeetingRoom CinnabarGym Lab1 Lab2 Lab3 Lab4 CinnabarPokecenter CinnabarMart CopycatsHouse1F Gary Lorelei Bruno Agatha".split()
     HIDDEN_OBJECT_MAPS = "RedsHouse2F BluesHouse OaksLab ViridianPokecenter ViridianMart ViridianSchool ViridianGym Museum1F PewterGym PewterMart PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter VermilionPokecenter VermilionGym CeladonMansion2 CeladonPokecenter CeladonGym GameCorner CeladonHotel FuchsiaPokecenter FuchsiaGym CinnabarGym CinnabarPokecenter SaffronGym MtMoonPokecenter RockTunnelPokecenter BattleCenter TradeCenter ViridianForest MtMoon3 IndigoPlateau Route25 Route9 SSAnne6 SSAnne10 RocketHideout1 RocketHideout3 RocketHideout4 SaffronPokecenter PokemonTower5 Route13 SafariZoneEntrance SafariZoneWest SilphCo5F SilphCo9F CopycatsHouse2F UnknownDungeon1 UnknownDungeon3 PowerPlant SeafoamIslands3 SeafoamIslands5 Mansion1 Mansion3 Route23 VictoryRoad2 Unused6F BillsHouse ViridianCity SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 Route15GateUpstairs LavenderHouse1 CeladonMansion5 FightingDojo Route10 IndigoPlateauLobby CinnabarLab4 BikeShop Route11 Route12 Mansion2 Mansion4 SilphCo11F Route17 UndergroundPathNs UndergroundPathWe CeladonCity SeafoamIslands4 VermilionCity CeruleanCity Route4".split()
     FIELD_ITEMS = []
+    EXISTING_CRIES = []
+    
     with ROM('roms/'+filename, 'rb') as rom:
         for objectmap in OBJECT_MAPS:
             rom.seek(symbols[objectmap+'Object'])
@@ -268,6 +273,10 @@ class PokemonRed(Game):
             if bank * 0x4000 + (offset % 0x4000) == symbols["HiddenItems"]:
                 FIELD_ITEMS.append((rom.tell()-4, item))
     
+        rom.seek(symbols['CryHeaders'])
+        for i in range(251):
+            EXISTING_CRIES.append(rom.read(6))
+    
     KEY_ITEMS = [0x2B, 0x30, 0x3B, 0x40, 0x48, 0x4A, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8]
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
@@ -275,6 +284,8 @@ class PokemonRed(Game):
     TRAINER_CLASSES = ["YOUNGSTER", "BUG CATCHER", "LASS", "SAILOR", "JR.TRAINER♂", "JR.TRAINER♀", "POKéMANIAC", "SUPER NERD", "HIKER", "BIKER", "BURGLAR", "ENGINEER", "JUGGLER", "FISHERMAN", "SWIMMER", "CUE BALL", "GAMBLER", "BEAUTY", "PSYCHIC", "ROCKER", "JUGGLER", "TAMER", "BIRD KEEPER", "BLACKBELT", "RIVAL1", "PROF.OAK", "CHIEF", "SCIENTIST", "GIOVANNI", "ROCKET", "COOLTRAINER♂", "COOLTRAINER♀", "BRUNO", "BROCK", "MISTY", "LT.SURGE", "ERIKA", "KOGA", "BLAINE", "SABRINA", "GENTLEMAN", "RIVAL2", "RIVAL3", "LORELEI", "CHANNELER", "AGATHA", "LANCE"]
     
     OW_SPRITES = "red blue oak bug_catcher slowbro lass black_hair_boy_1 little_girl bird fat_bald_guy gambler black_hair_boy_2 girl hiker foulard_woman gentleman daisy biker sailor cook bike_shop_guy mr_fuji giovanni rocket medium waiter erika mom_geisha brunette_girl lance oak_aide oak_aide rocker swimmer white_player gym_helper old_person mart_guy fisher old_medium_woman nurse cable_club_woman mr_masterball lapras_giver warden ss_captain fisher2 blackbelt guard mom balding_guy young_boy gameboy_kid gameboy_kid clefairy agatha bruno lorelei seel".split()
+    
+    SONGS = [line.split() for line in open("data/songs.txt").read().split('\n') if line.strip()]
     
     def random_pokemon(self):
         return choice(self.POKEMON)
@@ -319,7 +330,7 @@ class PokemonRed(Game):
     def opt_trainer_pokemon(self):
         rom = self.rom
         rom.seek(self.symbols["YoungsterData"])
-        while rom.tell() < 0x3a522 + 12:
+        while rom.tell() < self.symbols["TrainerAI"]:
             first_byte = ord(rom.read(1))
             if first_byte == 0xff:
                 while ord(rom.read(1)) != 0:
@@ -369,11 +380,15 @@ class PokemonRed(Game):
     #        rom.read(2)
     
     def opt_cries(self):
-        self.rom.seek(self.symbols["CryData"])
-        for i in range(190):
-            self.rom.write(chr(randint(0, 0x25)))
-            self.rom.write(chr(randint(0, 0xff)))
-            self.rom.write(chr(randint(0, 0xa0))) # could be ff
+        self.rom.seek(self.symbols["CryHeaders"])
+        for i, mon in enumerate(self.DEX):
+            if mon <= 251:
+                self.rom.write(self.EXISTING_CRIES[mon-1])
+            else:
+                self.rom.writeshort(randint(0, 0x43)) # base cry
+                self.rom.writebyte(randint(0, 0xff))  # pitch
+                self.rom.writebyte(randint(0, 0xff))  # echo
+                self.rom.writeshort(randint(0, 0x80)) # length
     
     def opt_game_pokemon(self):
         types = self.TYPES
@@ -396,7 +411,8 @@ class PokemonRed(Game):
         #self.patch_sprite_loading_routine() # no need to do that, our hack will use
                                              # the bank if it's present, otherwise default behavior
         pokemon_sprite_addresses = []
-        banki = 0x2d # 2D: first new sprite bank
+        banki = 0x38 # 38: first new sprite bank
+        # when symfiles are better use BANK(SpriteBank1)
         bank = b""
         for num in dex:
             addresses = []
@@ -518,15 +534,15 @@ GrowthRateTable: ; 5901d (16:501d)
                     rom.writebyte(self.POKEMON_MAPPINGS.index(1+dex.index(evolution['evolved_species'])))
                 rom.writebyte(0)
                 # moves
-                for level in minidex['pokemon'][num]['moveset']:
-                    if level != 0 and randint(0, 1):
+                for movei, level in enumerate(minidex['pokemon'][num]['moveset']):
+                    if level != 0 and (movei <= 2 or movei % 2 == 0):
                         rom.write(chr(level))
                         rom.write(chr(choice(self.FAIR_MOVES)))
                 rom.writebyte(0) # end moves
             if dexnum == 151:
                 rom.writebyte(0)
                 rom.writebyte(0)
-        assert rom.tell() < 0x3c000
+        assert rom.tell() < 0x3c000, hex(rom.tell())
         
         rom.seek(self.symbols["EvosMovesPointerTable"])
         for evo_move_pointer in evo_move_pointers:
@@ -658,7 +674,7 @@ GrowthRateTable: ; 5901d (16:501d)
     def opt_ow_sprites(self):
         # 59 sprites total, 0x180 bytes per sprite, 42 fit in one bank
         locs = {}
-        for bank, sprites in ((0x3a, self.OW_SPRITES[:42]), (0x3b, self.OW_SPRITES[42:])):
+        for bank, sprites in ((0x3e, self.OW_SPRITES[:42]), (0x3f, self.OW_SPRITES[42:])):
             self.rom.seek(0x3f * 0x4000)
             for sprite in sprites:
                 locs[sprite] = self.rom.tell()
@@ -672,6 +688,13 @@ GrowthRateTable: ; 5901d (16:501d)
             self.rom.writeshort(locs[sprite] % 0x4000 + 0x4000)
             self.rom.writebyte(0xc0)
             self.rom.writebyte(locs[sprite] // 0x4000)
+    
+    def opt_soundtrack(self):
+        self.rom.seek(self.symbols["Music"])
+        for songs in self.SONGS:
+            song = "Music_"+choice(songs)
+            self.rom.writebyte(self.symbols[song] / 0x4000)
+            self.rom.writeshort((self.symbols[song] % 0x4000) + 0x4000)
     
     def opt_instant_text(self):
         self.rom.seek(0x00ff)
