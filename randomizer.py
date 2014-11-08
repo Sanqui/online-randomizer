@@ -573,7 +573,7 @@ GrowthRateTable: ; 5901d (16:501d)
         if self.choices['game_pokemon']: return
         rom = self.rom
         for i in range(150):
-            rom.seek(self.symbols["BulbasaurBaseStats"] + 15 + (28 * i))
+            rom.seek(self.symbols["BaseStats"] + 15 + (28 * i))
             # moves known at lv 0
             moves = []
             for i in range(4):
