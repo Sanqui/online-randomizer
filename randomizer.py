@@ -485,14 +485,14 @@ class PokemonRed(Game):
             for move in moves:
                 rom.write(chr(move))
             
-            rom.write(chr({1:5, 2:0, 3:4, 4:3, 5:3, 6:5}[data['growth_rate']]))
+            rom.write(chr({1:5, 2:0, 3:4, 4:3, 5:6, 6:7}[data['growth_rate']]))
             """
 1	slow
 2	medium
 3	fast
 4	medium-slow
-5	slow-then-very-fast
-6	fast-then-very-slow"""
+5	slow-then-very-fast (erratic)
+6	fast-then-very-slow (fluctuating)"""
             """
 GrowthRateTable: ; 5901d (16:501d)
 	db $11,$00,$00,$00 ; medium fast      n^3
