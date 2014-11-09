@@ -117,19 +117,21 @@ class Game():
         self.rom = ROM(filename, 'w+b')
         self.rom.write(original)
         
+        print("Producing rom: {} with options: {}".format(filename, self.choices))
+        
         methods = []
         for option, value in self.choices.items():
             if value and hasattr(self, "opt_"+option):
                 params = []
                 if value != True:
                     params = [value]
-                print option, value, params
+                #print option, value, params
                 #print "Randomizing: "+option
                 methods.append((option, getattr(self, "opt_"+option), params))
         
         methods.sort(key=lambda x: x[1].layer if hasattr(x[1], 'layer') else 0)
         for option, method, params in methods:
-            print "Randomizing: "+option+" with "+str(params)
+            #print "Randomizing: "+option+" with "+str(params)
             method(*params)
         
         self.finalize()
@@ -405,7 +407,7 @@ class PokemonRed(Game):
         
         self.DEX_FAMILIES = dex_families
         self.DEX = dex
-        print 'Picked {} mons for dex'.format(len(dex))
+        #print 'Picked {} mons for dex'.format(len(dex))
         
         # sprites
         #self.patch_sprite_loading_routine() # no need to do that, our hack will use
@@ -443,7 +445,7 @@ class PokemonRed(Game):
         
         rom.seek(banki*0x4000)
         rom.write(bank)
-        print "Wrote sprites (last bank: {})".format(hex(banki))
+        #print "Wrote sprites (last bank: {})".format(hex(banki))
         
         # base stats
         self.rom.seek(self.symbols["BaseStats"]) # BulbasaurBaseStats
