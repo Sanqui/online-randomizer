@@ -400,7 +400,7 @@ class PokemonRed(Game):
         while len(dex) < 150:
             randfamily = choice(minidex['evolution_chains'])
             #if randfamily[0] >= 719: continue # Diancie, no sprites
-            if randfamily[0] == 151: pass
+            if randfamily[0] == 151: continue
             if randfamily not in dex_families and len(dex)+len(randfamily) <= 150:
                 dex += randfamily
                 dex_families.append(randfamily)
