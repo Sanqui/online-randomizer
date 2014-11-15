@@ -223,7 +223,7 @@ class PokemonRed(Game):
     EVOLUTION_METHODS = {'level-up': 1, 'use-item': 2, 'trade': 3}
 
     TYPES = {'normal': 0x00, 'fighting': 0x01, 'flying': 0x02, 'poison': 0x03, 'ground': 0x04,
-             'rock': 0x05, 'bug': 0x06, 'ghost': 0x07, 'ghost': 0x08,
+             'rock': 0x05, 'bug': 0x07, 'ghost': 0x08,
              'fire': 0x14, 'water': 0x15, 'grass': 0x16, 'electric': 0x17, 'psychic': 0x18,
              'ice': 0x19, 'dragon': 0x1a,
              'dark': 0x00, 'steel': 0x00, 'fairy': 0x00}
@@ -612,29 +612,17 @@ GrowthRateTable: ; 5901d (16:501d)
                 rom.writebyte(move)
     
     def opt_update_types(self):
-        self.TYPES.update({'dark': 0x09, 'steel': 0x0a, 'fairy': 0x0b})
-        types = self.TYPES
-        name_offsets = []
-        self.rom.seek(self.symbols["Type00Name"])
-        for i in range(0x1b):
-            name_offsets.append(self.rom.tell())
-            type_ = None
-            for tname, ti in types.items():
-                #print tname, ti, i, ti==i, type_
-                if ti == i:
-                    type_ = tname
-                    break
-            if type_:
-                self.write_string(tname.upper())
-        self.rom.seek(self.symbols["TypeNamePointers"])
-        for ptr in name_offsets:
-            self.rom.write(struct.pack(b"<H", ptr % 0x4000 + 0x4000))
+        self.TYPES.update({'dark': 0x1b, 'steel': 0x09, 'fairy': 0x1c})
+        
+        # We don't need to update the type names any more, they're
+        # in pokered-randomizer.
+        
         self.rom.seek(self.symbols["TypeEffects"])
         for type0, type1, factor in type_efficacy:
             if factor != 100:
-                self.rom.write(chr(types[type0]))
-                self.rom.write(chr(types[type1]))
-                self.rom.write(chr({0:0x00, 50: 0x05, 200: 0x20}[factor]))
+                self.rom.writebyte(self.TYPES[type0])
+                self.rom.writebyte(self.TYPES[type1])
+                self.rom.writebyte({0:0x00, 50: 0x05, 200: 0x20}[factor])
         self.rom.writebyte(0xff)
     opt_update_types.layer = -5
         
