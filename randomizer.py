@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+from bidict import bidict
 
 import os
 import datetime
@@ -163,7 +164,7 @@ class PokemonRed(Game):
         cries = BooleanField("Randomize Pokémon cries", description="Don't worry, Jynx-tier cries are nerfed.")
         trainer_classes = BooleanField("Shuffle trainer classes", description="This affects payouts too, but not AI.")
         ow_sprites = BooleanField("Shuffle overworld sprites", description="This is purely visual and for fun.")
-        field_items = SelectField('Field items', choices=dechoices(":-;shuffle:Shuffle;shuffle-no-tm:Shuffle, keep TMs"), default="", description="This option randomizes what you can find lying on the ground.")
+        field_items = SelectField('Field items', choices=dechoices(":-;shuffle-no-tm:Shuffle, keep TMs;shuffle:Shuffle;random-no-tm:Random, keep TMs;random:Random;random-key:Random with Key Items"), default="", description="This option randomizes what you can find lying on the ground.")
         soundtrack = BooleanField("Randomize the soundtrack", description="Picks random fitting songs for each song in Red from GSC, TCG, Pinball and a few demixes.  There'll be an option to narrow it down soon.  Purely aural.")
     
         h_tweaks = Heading("Tweaks")
@@ -227,8 +228,11 @@ class PokemonRed(Game):
              'fire': 0x14, 'water': 0x15, 'grass': 0x16, 'electric': 0x17, 'psychic': 0x18,
              'ice': 0x19, 'dragon': 0x1a,
              'dark': 0x00, 'steel': 0x00, 'fairy': 0x00}
-     
-    ITEMS = {'moon-stone': 0x0a, 'fire-stone': 0x20, 'thunder-stone': 0x21,
+    
+    ITEMS = bidict({"MASTER_BALL": 0x01, "ULTRA_BALL": 0x02, "GREAT_BALL": 0x03, "POKE_BALL": 0x04, "TOWN_MAP": 0x05, "BICYCLE": 0x06, "SAFARI_BALL": 0x08, "POKEDEX": 0x09, "MOON_STONE": 0x0A, "ANTIDOTE": 0x0B, "BURN_HEAL": 0x0C, "ICE_HEAL": 0x0D, "AWAKENING": 0x0E, "PARLYZ_HEAL": 0x0F, "FULL_RESTORE": 0x10, "MAX_POTION": 0x11, "HYPER_POTION": 0x12, "SUPER_POTION": 0x13, "POTION": 0x14, "ESCAPE_ROPE": 0x1D, "REPEL": 0x1E, "OLD_AMBER": 0x1F, "FIRE_STONE": 0x20, "THUNDER_STONE": 0x21, "WATER_STONE": 0x22, "HP_UP": 0x23, "PROTEIN": 0x24, "IRON": 0x25, "CARBOS": 0x26, "CALCIUM": 0x27, "RARE_CANDY": 0x28, "DOME_FOSSIL": 0x29, "HELIX_FOSSIL": 0x2A, "SECRET_KEY": 0x2B, "BIKE_VOUCHER": 0x2D, "X_ACCURACY": 0x2E, "LEAF_STONE": 0x2F, "CARD_KEY": 0x30, "NUGGET": 0x31, "POKE_DOLL": 0x33, "FULL_HEAL": 0x34, "REVIVE": 0x35, "MAX_REVIVE": 0x36, "GUARD_SPEC_": 0x37, "SUPER_REPEL": 0x38, "MAX_REPEL": 0x39, "DIRE_HIT": 0x3A, "FRESH_WATER": 0x3C, "SODA_POP": 0x3D, "LEMONADE": 0x3E, "S_S__TICKET": 0x3F, "GOLD_TEETH": 0x40, "X_ATTACK": 0x41, "X_DEFEND": 0x42, "X_SPEED": 0x43, "X_SPECIAL": 0x44, "COIN_CASE": 0x45, "OAKS_PARCEL": 0x46, "ITEMFINDER": 0x47, "SILPH_SCOPE": 0x48, "POKE_FLUTE": 0x49, "LIFT_KEY": 0x4A, "EXP__ALL": 0x4B, "OLD_ROD": 0x4C, "GOOD_ROD": 0x4D, "SUPER_ROD": 0x4E, "PP_UP": 0x4F, "ETHER": 0x50, "MAX_ETHER": 0x51, "ELIXER": 0x52, "MAX_ELIXER": 0x53, "HM_01": 0xC4, "HM_02": 0xC5, "HM_03": 0xC6, "HM_04": 0xC7, "HM_05": 0xC8, "TM_01": 0xC9, "TM_02": 0xCA, "TM_03": 0xCB, "TM_04": 0xCC, "TM_05": 0xCD, "TM_06": 0xCE, "TM_07": 0xCF, "TM_08": 0xD0, "TM_09": 0xD1, "TM_10": 0xD2, "TM_11": 0xD3, "TM_12": 0xD4, "TM_13": 0xD5, "TM_14": 0xD6, "TM_15": 0xD7, "TM_16": 0xD8, "TM_17": 0xD9, "TM_18": 0xDA, "TM_19": 0xDB, "TM_20": 0xDC, "TM_21": 0xDD, "TM_22": 0xDE, "TM_23": 0xDF, "TM_24": 0xE0, "TM_25": 0xE1, "TM_26": 0xE2, "TM_27": 0xE3, "TM_28": 0xE4, "TM_29": 0xE5, "TM_30": 0xE6, "TM_31": 0xE7, "TM_32": 0xE8, "TM_33": 0xE9, "TM_34": 0xEA, "TM_35": 0xEB, "TM_36": 0xEC, "TM_37": 0xED, "TM_38": 0xEE, "TM_39": 0xEF, "TM_40": 0xF0, "TM_41": 0xF1, "TM_42": 0xF2, "TM_43": 0xF3, "TM_44": 0xF4, "TM_45": 0xF5, "TM_46": 0xF6, "TM_47": 0xF7, "TM_48": 0xF8, "TM_49": 0xF9, "TM_50": 0xFA})
+    BANNED_ITEMS = "TOWN_MAP BICYCLE SAFARI_BALL POKEDEX OLD_AMBER DOME_FOSSIL HELIX_FOSSIL SECRET_KEY BIKE_VOUCHER CARD_KEY S_S__TICKET GOLD_TEETH COIN_CASE OAKS_PARCEL ITEMFINDER SILPH_SCOPE POKE_FLUTE LIFT_KEY EXP__ALL OLD_ROD GOOD_ROD SUPER_ROD HM_01 HM_02 HM_03 HM_04 HM_05".split()
+    #KEY_ITEMS = [0x2B, 0x30, 0x3B, 0x40, 0x48, 0x4A, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8]
+    EVO_ITEMS = {'moon-stone': 0x0a, 'fire-stone': 0x20, 'thunder-stone': 0x21,
              'water-stone': 0x22, 'leaf-stone': 0x2f} # TODO
              
     MAXMOVE = 0xa4 # substitute
@@ -279,7 +283,6 @@ class PokemonRed(Game):
         for i in range(251):
             EXISTING_CRIES.append(rom.read(6))
     
-    KEY_ITEMS = [0x2B, 0x30, 0x3B, 0x40, 0x48, 0x4A, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8]
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
     
@@ -352,13 +355,31 @@ class PokemonRed(Game):
                     rom.read(1)
                     rom.write(chr(self.random_pokemon()))
 
+    # ":-;shuffle-no-tm:Shuffle, keep TMs;shuffle:Shuffle;random-no-tm:Random, keep TMs;random:Random;random-key:Random with Key Items"
     def opt_field_items(self, mode):
         items = []
         addresses = []
+        tm = mode not in ('shuffle-no-tm', 'random-no-tm')
         for address, item in self.FIELD_ITEMS:
-            if item not in self.KEY_ITEMS + range(0xc4, 0xfb) if mode == "shuffle-no-tm" else []:
+            if self.ITEMS[:item] not in self.BANNED_ITEMS and (tm or item not in range(self.ITEMS['TM_01'], self.ITEMS['TM_50']+1)):
                 items.append(item)
                 addresses.append(address)
+        
+        if mode in ("random-no-tm", "random", "random-key"):
+            new_items = []
+            free_items = self.ITEMS.keys()
+            if mode != "random-key":
+                for item in self.BANNED_ITEMS:
+                    free_items.remove(item)
+            if not tm:
+                for tm in range(1, 51):
+                    free_items.remove("TM_{:02}".format(tm))
+            for i in range(len(items)-len(new_items)):
+                item = choice(free_items)
+                new_items.append(self.ITEMS[item])
+                if item in self.BANNED_ITEMS:
+                    free_items.remove(item)
+            items = new_items
         
         shuffle(items)
         for address in addresses:
@@ -529,7 +550,7 @@ GrowthRateTable: ; 5901d (16:501d)
                     if trigger == 'level-up':
                         rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
                     elif trigger == 'use-item':
-                        rom.write(chr(self.ITEMS.get(evolution['trigger_item'], self.ITEMS['moon-stone'])))
+                        rom.write(chr(self.EVO_ITEMS.get(evolution['trigger_item'], self.EVO_ITEMS['moon-stone'])))
                         rom.writebyte(1)
                     elif trigger == 'trade':
                         rom.writebyte(1)
