@@ -25,6 +25,18 @@ class Heading(Field):
     def __call__(self, **kwargs):
         return "<h3 class='ui header'>"+self.label.text+"</h3>"
 
+class MultiCheckboxField(SelectMultipleField):
+    """
+    A multiple-select, except displays a list of checkboxes.
+
+    Iterating the field will produce subfields, allowing custom rendering of
+    the enclosed checkbox fields.
+    
+    Shamelessly stolen from WTForms FAQ.
+    """
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
 minidex = yaml.load(open('data/minidex.yaml'))
 type_names = "- normal fighting flying poison ground rock bug ghost steel fire water grass electric psychic ice dragon dark fairy".split()
 type_efficacy = []
@@ -69,6 +81,7 @@ class Game():
     #options = {"dummy": "Randomize a thing"}
     presets = {}
     
+    form_expanded_by = {}
     # TODO form
     
     CHARS = {}
@@ -147,25 +160,30 @@ class PokemonRed(Game):
     identifier = "pokered"
     symbols = symfile("roms/pokered.sym")
     
-    class Form(Form):
+    form_expanded_by = {'game_pokemon_source_generations': 'game_pokemon',
+        'special_conversion': 'game_pokemon',
+        'force_attacking': 'movesets',
+        'move_rules': 'movesets',
+        'soundtrack_sources': 'soundtrack'}
+    class Form(Form):        
         h_randomize = Heading("Randomizations")
         
-        game_pokemon = BooleanField("Include Pokémon from all generations", description="This is exactly what it sounds like.  150 random Pokémon from all 721 will be picked and inserted into the game's Pokédex.  Check it out.")
-        backsprites = SelectField('Backsprites for new Pokémon', choices=dechoices("front:Flipped frontsprites;back:Backsprites where available"), default="back", description="We're working on it, but not all backsprites are done yet.  If you value consistency over prettiness, you can choose the old-style flipped frontsprites for all Pokémon.")
+        game_pokemon = BooleanField("Include Pokémon from later generations", description="This is exactly what it sounds like.  150 random Pokémon from all 721 will be picked and inserted into the game's Pokédex.  Check it out.")
+        game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=list(enumerate("I II III IV V VI".split(), start=1)), default=(1, 2, 3, 4, 5, 6), coerce=int)
+        special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizer the Pokémon opponent trainers carry.  The levels stay the same.")
         wild_pokemon = BooleanField("Randomize wild Pokémon", description="This option randomizes the ten possible wild Pokémon in each area.")
         #ow_pokemon = BooleanField("Randomize gift and overworld Pokémon")
-        special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         movesets = BooleanField("Randomize movesets", description="Randomizes which moves Pokémon learn, both on level up and TM compatibility.")
         force_attacking = BooleanField("Always start with an attacking move", description="Don't pick this if you enjoy having Splash as your only move.")
-        tms = BooleanField("Randomize the moves TMs teach", description="Note that Gym Leaders will still announce their old TM for now, so make sure to check!")
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken", description="This opinion is useful for races, for example, to prevent skipping the whole Nugget Bridge and S. S. Anne if somebody gets lucky with Cut.")
-        cries = BooleanField("Randomize Pokémon cries", description="Don't worry, Jynx-tier cries are nerfed.")
+        tms = BooleanField("Randomize the moves TMs teach", description="Note that Gym Leaders will still announce their old TM for now, so make sure to check!")
         trainer_classes = BooleanField("Shuffle trainer classes", description="This affects payouts too, but not AI.")
         ow_sprites = BooleanField("Shuffle overworld sprites", description="This is purely visual and for fun.")
         field_items = SelectField('Field items', choices=dechoices(":-;shuffle-no-tm:Shuffle, keep TMs;shuffle:Shuffle;random-no-tm:Random, keep TMs;random:Random;random-key:Random with Key Items"), default="", description="This option randomizes what you can find lying on the ground.")
         soundtrack = BooleanField("Randomize the soundtrack", description="Picks random fitting songs for each song in Red from GSC, TCG, Pinball and a few demixes.  There'll be an option to narrow it down soon.  Purely aural.")
+        soundtrack_sources = MultiCheckboxField("Sources", choices=dechoices("red:Red;crystal:Crystal;side:TCG & Pinball;demixes:Demixes;fan:Fan (Prism)"), default="red crystal side demixes fan".split())
     
         h_tweaks = Heading("Tweaks")
         change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
@@ -291,6 +309,7 @@ class PokemonRed(Game):
     OW_SPRITES = "red blue oak bug_catcher slowbro lass black_hair_boy_1 little_girl bird fat_bald_guy gambler black_hair_boy_2 girl hiker foulard_woman gentleman daisy biker sailor cook bike_shop_guy mr_fuji giovanni rocket medium waiter erika mom_geisha brunette_girl lance oak_aide oak_aide rocker swimmer white_player gym_helper old_person mart_guy fisher old_medium_woman nurse cable_club_woman mr_masterball lapras_giver warden ss_captain fisher2 blackbelt guard mom balding_guy young_boy gameboy_kid gameboy_kid clefairy agatha bruno lorelei seel".split()
     
     SONGS = [line.split() for line in open("data/songs.txt").read().split('\n') if line.strip()]
+    SONG_SOURCES = yaml.load(open("data/song_sources.yaml"))
     
     def random_pokemon(self):
         return choice(self.POKEMON)
@@ -353,7 +372,7 @@ class PokemonRed(Game):
             if rate != 0:
                 for i in range(10):
                     rom.read(1)
-                    rom.write(chr(self.random_pokemon()))
+                    rom.writebyte(self.random_pokemon())
 
     # ":-;shuffle-no-tm:Shuffle, keep TMs;shuffle:Shuffle;random-no-tm:Random, keep TMs;random:Random;random-key:Random with Key Items"
     def opt_field_items(self, mode):
@@ -402,29 +421,61 @@ class PokemonRed(Game):
     #            rom.write(chr(randint(1, 0x3b)))
     #        rom.read(2)
     
-    def opt_cries(self):
-        self.rom.seek(self.symbols["CryHeaders"])
-        for i, mon in enumerate(self.DEX):
-            if mon <= 251:
-                self.rom.write(self.EXISTING_CRIES[mon-1])
-            else:
-                self.rom.writeshort(randint(0, 0x43)) # base cry
-                self.rom.writebyte(randint(0, 0xff))  # pitch
-                self.rom.writebyte(randint(0, 0xff))  # echo
-                self.rom.writeshort(randint(0, 0x80)) # length
-    
     def opt_game_pokemon(self):
-        types = self.TYPES
-        rom = self.rom
+        families = minidex['evolution_chains']
+        
+        generation_ranges = (range(  1, 152), range(152, 252), range(252, 387),
+                             range(387, 494), range(494, 650), range(650, 723))
+        if self.choices['game_pokemon_source_generations']:
+            allowed_pokemon = sum((r for gen, r in enumerate(generation_ranges, 1) if gen in self.choices['game_pokemon_source_generations']), [])
+        else:
+            allowed_pokemon = range(1, 723)
+        if 151 in allowed_pokemon: allowed_pokemon.remove(151)
+        
+        families_ = []
+        # this could be rewritten as a generator but meh
+        for family in families:
+            family_ = []
+            for mon in family:
+                if mon in allowed_pokemon:
+                    family_.append(mon)
+            if family_: families_.append(family_)
+        
+        families = families_
+        
+        dex_size = min(150, len(allowed_pokemon))
         dex = []
         dex_families = []
-        while len(dex) < 150:
+        popcount = 0
+        while True:
+            for i in range(popcount):
+                dex_families.pop()
+            shuffle(families)
+            for family in families:
+                if family not in dex_families and len(dex) + len(family) <= dex_size:
+                    dex_families.append(family)
+                    dex += family
+                if len(dex) == dex_size: break
+            if len(dex) == dex_size: break
+            popcount += 1
+            if popcount > 10: popcount = 10 # wtf
+        
+        
+        pokemon = []
+        for i, dexnum in enumerate(self.POKEMON_MAPPINGS):
+            if dexnum and dexnum <= len(dex):
+                pokemon.append(i)
+        self.POKEMON = pokemon
+        
+        types = self.TYPES
+        rom = self.rom
+        '''while len(dex) < 150:
             randfamily = choice(minidex['evolution_chains'])
             #if randfamily[0] >= 719: continue # Diancie, no sprites
             if randfamily[0] == 151: continue
             if randfamily not in dex_families and len(dex)+len(randfamily) <= 150:
                 dex += randfamily
-                dex_families.append(randfamily)
+                dex_families.append(randfamily)'''
         
         self.DEX_FAMILIES = dex_families
         self.DEX = dex
@@ -443,7 +494,7 @@ class PokemonRed(Game):
             sprites = b""
             sprites += open('sprites/{:03}.pic'.format(num)).read()
             addresses.append((banki, len(bank)+len(sprites)))
-            sprites += open('backsprites{}/{:03}.pic'.format("_" if self.choices['backsprites']=="back" else "", num)).read()
+            sprites += open('backsprites_/{:03}.pic'.format(num)).read()
             if len(bank + sprites) < 0x4000:
                 bank += sprites
                 pokemon_sprite_addresses.append(addresses)
@@ -458,7 +509,7 @@ class PokemonRed(Game):
                 sprites = b""
                 sprites += open('sprites/{:03}.pic'.format(num)).read()
                 addresses.append((banki, len(bank)+len(sprites)))
-                sprites += open('backsprites/{:03}.pic'.format(num)).read()
+                sprites += open('backsprites_/{:03}.pic'.format(num)).read()
                 
                 bank += sprites
                 pokemon_sprite_addresses.append(addresses)
@@ -537,10 +588,11 @@ GrowthRateTable: ; 5901d (16:501d)
         for i in range(1, 191):
             evo_move_pointers.append(rom.tell())
             dexnum = self.POKEMON_MAPPINGS[i]
-            if dexnum and dexnum != 151:
+            if dexnum and dexnum != 151 and dexnum <= len(dex):
                 num = dex[dexnum - 1]
                 # evolutions
                 for evolution in minidex['pokemon'][num]['evolutions']:
+                    if evolution['evolved_species'] not in dex: continue
                     trigger = {'shed': 'level-up'}.get(evolution['trigger'], evolution['trigger'])
                     if trigger == "trade" and self.choices['change_trade_evos']:
                         trigger = 'level-up'
@@ -558,7 +610,7 @@ GrowthRateTable: ; 5901d (16:501d)
                 rom.writebyte(0)
                 # moves
                 for movei, level in enumerate(minidex['pokemon'][num]['moveset']):
-                    if level != 0 and (movei <= 2 or movei % 2 == 0):
+                    if level != 1 and (movei <= 2 or movei % 2 == 0):
                         rom.write(chr(level))
                         rom.write(chr(choice(self.FAIR_MOVES)))
                 rom.writebyte(0) # end moves
@@ -575,21 +627,36 @@ GrowthRateTable: ; 5901d (16:501d)
         
         for i in range(1, 191):
             dexnum = self.POKEMON_MAPPINGS[i]
-            if dexnum and dexnum != 151:
+            if dexnum and dexnum != 151 and dexnum <= len(dex):
                 num = dex[dexnum - 1]
                 self.write_string(minidex['pokemon'][num]['name'].upper(), 10)
-            else:
+            elif dexnum == 151:
                 self.write_string("MEW", 10)
+            else:
+                self.write_string("SANQUII", 10)
         
         # menu icons
         self.rom.seek(self.symbols["MonPartyData"]) # what a bad name
-        for i in range(150/2):
-            self.rom.writebyte( (menu_icons[dex[i*2]] << 4) | menu_icons[dex[i*2+1]])
+        for i in range((len(dex)+1)/2):
+            self.rom.writebyte( ((menu_icons[dex[i*2]]   if i*2  <len(dex) else 0) << 4) |
+                                 (menu_icons[dex[i*2+1]] if i*2+1<len(dex) else 0))
         
         # Write palettes
         self.rom.seek(self.symbols["MonsterPalettes"]+1)
-        for i in range(150):
+        for i in range(len(dex)):
             self.rom.writebyte(self.PALS[monpals[dex[i]-1]])
+        
+        # cries
+        
+        self.rom.seek(self.symbols["CryHeaders"])
+        for i, mon in enumerate(self.DEX):
+            if mon <= 251:
+                self.rom.write(self.EXISTING_CRIES[mon-1])
+            else:
+                self.rom.writeshort(randint(0, 0x43)) # base cry
+                self.rom.writebyte(randint(0, 0xff))  # pitch
+                self.rom.writebyte(randint(0, 0xff))  # echo
+                self.rom.writeshort(randint(0, 0x80)) # length
     opt_game_pokemon.layer = -1
     
     def opt_movesets(self):
@@ -703,6 +770,14 @@ GrowthRateTable: ; 5901d (16:501d)
     def opt_soundtrack(self):
         self.rom.seek(self.symbols["Music"])
         for songs in self.SONGS:
+            if self.choices['soundtrack_sources']:
+                songs_ = []
+                for song in songs:
+                    for source in self.choices['soundtrack_sources']:
+                        if song in self.SONG_SOURCES[source]:
+                            songs_.append(song)
+                if not songs_: songs_ = [songs[0]]
+                songs = songs_
             song = "Music_"+choice(songs)
             self.rom.writebyte(self.symbols[song] / 0x4000)
             self.rom.writeshort((self.symbols[song] % 0x4000) + 0x4000)
@@ -712,8 +787,21 @@ GrowthRateTable: ; 5901d (16:501d)
         self.rom.writebyte(0x01) # bit 0 but i have no other stuff yet
                 
     def finalize(self):
+        self.rom.seek(self.symbols['TitleMons'])
+        for mon in sample(self.POKEMON, 16):
+            self.rom.writebyte(mon)
+        
+        
         self.rom.seek(self.symbols['TitleScreenText'])
         text = ""
+        text += "{:20}".format("")
+        text += "{:20}".format("Randomizer options")
+        text += "{:20}".format("are returning soon!")
+        text += "{:20}".format("")
+        text += "{:20}".format("This ROM comes from:")
+        text += "{:20}".format("http://tinyurl.com")
+        text += "{:20}".format("         /pkmnrandom")
+        '''text = ""
         text += "{:20}".format("Randomizer options:")
         option_strings = []
         for choice, value in self.choices.items():
@@ -721,10 +809,10 @@ GrowthRateTable: ; 5901d (16:501d)
             if value:
                 ot += choice
                 if value != True:
-                    ot += ": "+value
+                    ot += ": "+str(value)
                 option_strings.append(ot)
         text += ", ".join(option_strings) + "@"
-        text = text.replace('_', '-').replace('-pokemon','<>')
+        text = text.replace('_', '-').replace('-pokemon','<>')'''
         self.write_string(text)
     
 # TODO make good use of https://github.com/dannye/tcg !
@@ -829,14 +917,14 @@ game.choices["item_prices"] = True
 rom = game.produce()'''
 if __name__ == "__main__":
     game = games[0]( ) #PokemonRed()
-    game.choices["starter_pokemon"] = True
+    '''game.choices["starter_pokemon"] = True
     game.choices["trainer_pokemon"] = True
-    game.choices["wild_pokemon"] = True
+    game.choices["wild_pokemon"] = True'''
     game.choices["game_pokemon"] = True
-    game.choices["update_types"] = True
+    '''game.choices["update_types"] = True
     game.choices["tms"] = True
-    game.choices["cries"] = True
+    game.choices["cries"] = True'''
     game.choices["special_conversion"] = "average"
     #game.choices["instant_text"] = True
     #game.choices["ow_sprites"] = True
-    filename = game.produce()
+    filename = game.produce(None)
