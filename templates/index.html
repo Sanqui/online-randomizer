@@ -1,18 +1,21 @@
 <!doctype html>
-{% macro render_field(field) %}
+{% macro render_field(field, game) %}
   {%- if field.type == "Heading" -%}
-      {{-field(**kwargs)|safe-}}
+      <tr><td colspan=4>{{-field(**kwargs)|safe-}}</td>
   {%- else -%}
-      <dt><i class="{{'help' if field.description else ''}} icon popup" data-content="{{field.description}}"></i>{%- if field.name != "submit" -%}{{- field.label -}}{%- endif -%}</dt>
-      <dd>{{ field(**kwargs)|safe }}
-      {% if field.errors %}
-        <ul class=errors>
-        {% for error in field.errors %}
-          <li>{{ error }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-          </dd>
+      <tr data-expandedby="{{game.form_expanded_by[field.name]}}" class="{{'expanded' if game.form_expanded_by[field.name] else ''}}">
+          <td class="not-i td-label">{%- if field.name != "submit" -%}{{- field.label -}}{%- endif -%}</td>
+          <td><i class="{{'help' if field.description else ''}} icon popup" data-content="{{field.description}}"></i></td>
+          <td class="not-i td-input">{{ field(**kwargs)|safe }}
+          {% if field.errors %}
+            <ul class=errors>
+            {% for error in field.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+          </td>
+      </tr>
   {%- endif -%}
 {% endmacro %}
 <html>
@@ -41,7 +44,18 @@ input {background: white;}
 
 h4 {margin: 0;}
 
-i.popup {cursor: default; margin-right:10px !important;}
+/*i.popup {cursor: default; margin-right:10px !important;}*/
+
+table {border-collapse:collapse;}
+td.not-i {width: 50%;}
+td {vertical-align: top; border-bottom: 1px solid #eee;}
+/*tr.expanded .td-label {padding-left:8px;}*/
+tr.expanded .td-label {padding-left:12px;}
+
+form table ul {margin:0; padding:0; list-style-type: none;}
+form table ul li {margin:0; padding:0; display:inline;}
+
+i.icon {opacity:0.5; cursor:default;}
 
     </style>
     
@@ -92,6 +106,7 @@ function set_preset(presetid) {
             $("#"+option).val(preset[option])
         }
     }
+    update_all_expanded()
 }
 
 function generate() {
@@ -125,7 +140,26 @@ function generated(data) {
     }
 }
 function oops(x) {
+    generating = false
     $("#generating").html("Oops, something went wrong :(")
+    $("#btn-generate").removeClass('loading')
+    $("#btn-generate").show()
+    $("#btn-generate").text("Try again")
+}
+
+function update_all_expanded(instant) {
+    $('#options input').each(function(){
+        if (!this.id) return
+        var checked = this.checked
+        
+        console.log("thru update_all_expanded: input: "+this.id+", checked="+checked)
+        
+        if (checked) {
+            $('*[data-expandedby="'+this.id+'"]').fadeIn(instant ? 0 : 500)
+            $('*[data-expandedby="'+this.id+'"] input').prop('checked', true);
+        }
+        else { $('*[data-expandedby="'+this.id+'"]').fadeOut(instant ? 0 : 500) }
+    })
 }
 
 $(document).ready(function(){
@@ -135,9 +169,18 @@ $(document).ready(function(){
             $('#btn-preset-'+presetid).click(function() {set_preset(this.getAttribute('data-preset')) })
         }
     }
-    $('#btn-select-all').click(function() { $('#options input').prop('checked', true)})
-    $('#btn-select-none').click(function() { $('#options input').prop('checked', false)})
+    $('#btn-select-all').click(function() { $('#options input').prop('checked', true); update_all_expanded()})
+    $('#btn-select-none').click(function() { $('#options input').prop('checked', false); update_all_expanded()})
     $('#btn-generate').click(generate)
+    
+    $('#options input').change(function() {
+        var checked = this.checked
+        
+        console.log("input changed: "+this.id+", checked="+checked)
+        
+        if (checked) { $('*[data-expandedby="'+this.id+'"]').fadeIn(500) }
+        else { $('*[data-expandedby="'+this.id+'"]').fadeOut(500) }
+    })
     
     if (window.location.hash) {
         render_options(window.location.hash.substr(1), true)
@@ -147,6 +190,8 @@ $(document).ready(function(){
         position: 'top left',
         delay: 50,
     })
+    
+    update_all_expanded(true)
 })
     </script>
 </head>
@@ -187,11 +232,11 @@ $(document).ready(function(){
                         {% endif %}
                         <form id="form-{{game.identifier}}" class="">
                             <input type="hidden" name="game" value="{{game.identifier}}">
-                            <dl>
+                            <table>
                             {% for field in game.Form() %}
-                                {{ render_field(field) }}
+                                {{ render_field(field, game) }}
                             {% endfor %}
-                            </dl>
+                            </table>
                         </form>
                     </div>
                 {% endfor %}
