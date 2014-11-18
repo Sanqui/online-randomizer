@@ -289,18 +289,18 @@ class PokemonRed(Game):
         
         for hiddenobjectmap in HIDDEN_OBJECT_MAPS:
             rom.seek(symbols[hiddenobjectmap+'HiddenObjects'])
-            end = ord(rom.read(1))
-            if end == 0xff: continue
-            rom.read(1)
-            item = ord(rom.read(1))
-            bank, offset = rom.readbyte(), rom.readshort()
-            if bank * 0x4000 + (offset % 0x4000) == symbols["HiddenItems"]:
-                FIELD_ITEMS.append((rom.tell()-4, item))
+            while True:
+                end = ord(rom.read(1))
+                if end == 0xff: break
+                rom.read(1)
+                item = ord(rom.read(1))
+                bank, offset = rom.readbyte(), rom.readshort()
+                if bank * 0x4000 + (offset % 0x4000) == symbols["HiddenItems"]:
+                    FIELD_ITEMS.append((rom.tell()-4, item))
     
         rom.seek(symbols['CryHeaders'])
         for i in range(251):
             EXISTING_CRIES.append(rom.read(6))
-    
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
     
