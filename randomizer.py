@@ -169,7 +169,7 @@ class PokemonRed(Game):
         h_randomize = Heading("Randomizations")
         
         game_pokemon = BooleanField("Include Pokémon from later generations", description="This is exactly what it sounds like.  150 random Pokémon from all 721 will be picked and inserted into the game's Pokédex.  Check it out.")
-        game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=list(enumerate("I II III IV V VI".split(), start=1)), default=(1, 2, 3, 4, 5, 6), coerce=int)
+        game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=list(enumerate("I II III IV V VI".split(), start=1)), default=(1, 2, 3, 4, 5, 6), coerce=int, description="This lets you somewhat whitelist the Pokémon you'd like to see.  Try playing with just Gen V, for example!")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizer the Pokémon opponent trainers carry.  The levels stay the same.")
@@ -182,8 +182,8 @@ class PokemonRed(Game):
         trainer_classes = BooleanField("Shuffle trainer classes", description="This affects payouts too, but not AI.")
         ow_sprites = BooleanField("Shuffle overworld sprites", description="This is purely visual and for fun.")
         field_items = SelectField('Field items', choices=dechoices(":-;shuffle-no-tm:Shuffle, keep TMs;shuffle:Shuffle;random-no-tm:Random, keep TMs;random:Random;random-key:Random with Key Items"), default="", description="This option randomizes what you can find lying on the ground.")
-        soundtrack = BooleanField("Randomize the soundtrack", description="Picks random fitting songs for each song in Red from GSC, TCG, Pinball and a few demixes.  There'll be an option to narrow it down soon.  Purely aural.")
-        soundtrack_sources = MultiCheckboxField("Sources", choices=dechoices("red:Red;crystal:Crystal;side:TCG & Pinball;demixes:Demixes;fan:Fan (Prism)"), default="red crystal side demixes fan".split())
+        soundtrack = BooleanField("Randomize the soundtrack", description="Picks random fitting songs for each song in Red.  Enjoy listening to new music while you play.")
+        soundtrack_sources = MultiCheckboxField("Sources", choices=dechoices("red:Red;crystal:Crystal;side:TCG & Pinball;demixes:Demixes;fan:Fan (Prism)"), default="red crystal side demixes fan".split(), description="If there's no alternative song choose, you get the Red song.")
     
         h_tweaks = Heading("Tweaks")
         change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
@@ -801,6 +801,7 @@ GrowthRateTable: ; 5901d (16:501d)
         text += "{:20}".format("This ROM comes from:")
         text += "{:20}".format("http://tinyurl.com")
         text += "{:20}".format("         /pkmnrandom")
+        text += "@"
         '''text = ""
         text += "{:20}".format("Randomizer options:")
         option_strings = []
