@@ -174,7 +174,7 @@ class PokemonRed(Game):
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizer the Pokémon opponent trainers carry.  The levels stay the same.")
         wild_pokemon = BooleanField("Randomize wild Pokémon", description="This option randomizes the ten possible wild Pokémon in each area.")
-        #ow_pokemon = BooleanField("Randomize gift and overworld Pokémon")
+        ow_pokemon = BooleanField("Randomize gift and overworld Pokémon", description="This randomizes the Pokémon you can encounter on the overworld and the Pokémon you can receive or buy.")
         movesets = BooleanField("Randomize movesets", description="Randomizes which moves Pokémon learn, both on level up and TM compatibility.")
         force_attacking = BooleanField("Always start with an attacking move", description="Don't pick this if you enjoy having Splash as your only move.")
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken", description="This opinion is useful for races, for example, to prevent skipping the whole Nugget Bridge and S. S. Anne if somebody gets lucky with Cut.")
@@ -633,7 +633,8 @@ GrowthRateTable: ; 5901d (16:501d)
             elif dexnum == 151:
                 self.write_string("MEW", 10)
             else:
-                self.write_string("SANQUII", 10)
+                self.rom.read(10)
+                #self.write_string("SANQUII", 10)
         
         # menu icons
         self.rom.seek(self.symbols["MonPartyData"]) # what a bad name
