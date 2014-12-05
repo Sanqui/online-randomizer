@@ -162,6 +162,7 @@ class PokemonRed(Game):
     symbols = symfile("roms/pokered.sym")
     
     form_expanded_by = {'game_pokemon_source_generations': 'game_pokemon',
+        'pokedex_size': 'game_pokemon',
         'special_conversion': 'game_pokemon',
         'force_attacking': 'movesets',
         'move_rules': 'movesets',
@@ -171,6 +172,7 @@ class PokemonRed(Game):
         
         game_pokemon = BooleanField("Include Pokémon from later generations", description="This is exactly what it sounds like.  150 random Pokémon from all 721 will be picked and inserted into the game's Pokédex.  Check it out.")
         game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=list(enumerate("I II III IV V VI".split(), start=1)), default=(1, 2, 3, 4, 5, 6), coerce=int, description="This lets you somewhat whitelist the Pokémon you'd like to see.  Try playing with just Gen V, for example!")
+        pokedex_size = SelectField('Pokédex size', choices=dechoices("151:151;251:251"), default="251")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
         trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizer the Pokémon opponent trainers carry.  The levels stay the same.")
@@ -193,7 +195,7 @@ class PokemonRed(Game):
     
     presets = {
         'race': {
-            'starter_pokemon': 'randomize', 'ow_pokemon': True,
+            'starter_pokemon': 'randomize', 'ow_pokemon': True, 'pokedex_size': "251",
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
@@ -202,7 +204,7 @@ class PokemonRed(Game):
             'soundtrack': True
         },
         'casual': {
-            'starter_pokemon': 'three-basic', 'ow_pokemon': True,
+            'starter_pokemon': 'three-basic', 'ow_pokemon': True, 'pokedex_size': "251", 
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
@@ -211,7 +213,7 @@ class PokemonRed(Game):
             'soundtrack': True
         },
         'classic': {
-            'starter_pokemon': 'randomize', 'ow_pokemon': True,
+            'starter_pokemon': 'randomize', 'ow_pokemon': True, 
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
             'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
@@ -306,6 +308,10 @@ class PokemonRed(Game):
     OW_SPRITES = "red blue oak bug_catcher slowbro lass black_hair_boy_1 little_girl bird fat_bald_guy gambler black_hair_boy_2 girl hiker foulard_woman gentleman daisy biker sailor cook bike_shop_guy mr_fuji giovanni rocket medium waiter erika mom_geisha brunette_girl lance oak_aide oak_aide rocker swimmer white_player gym_helper old_person mart_guy fisher old_medium_woman nurse cable_club_woman mr_masterball lapras_giver warden ss_captain fisher2 blackbelt guard mom balding_guy young_boy gameboy_kid gameboy_kid clefairy agatha bruno lorelei seel".split()
     
     SONGS = [line.split() for line in open("data/songs.txt").read().split('\n') if line.strip()]
+    for song in SONGS:
+        for s in song:
+            if "Music_"+s not in symbols:
+                raise KeyError("Music_{} not in symfile. There could be a typo, or the symbol wasn't exported.".format(s))
     SONG_SOURCES = yaml.load(open("data/song_sources.yaml"))
     
     def random_pokemon(self):
@@ -419,6 +425,7 @@ class PokemonRed(Game):
     #        rom.read(2)
     
     def opt_game_pokemon(self):
+        original_151 = not all(self.choices[c] for c in "wild_pokemon trainer_pokemon ow_pokemon starter_pokemon".split())
         families = minidex['evolution_chains']
         
         generation_ranges = (range(  1, 152), range(152, 252), range(252, 387),
@@ -439,9 +446,18 @@ class PokemonRed(Game):
         
         families = families_
         
-        dex_size = min(251, len(allowed_pokemon))
-        dex = []
-        dex_families = []
+        dex_size = min(251 if self.choices['pokedex_size']=="251" else 151, len(allowed_pokemon))
+        if original_151:
+            dex = self.DEX
+            dex_families = self.DEX_FAMILIES
+            for family in families:
+                for mon in dex:
+                    if mon in family:
+                        family.remove(mon)
+            families = [f for f in families if f]
+        else:
+            dex = []
+            dex_families = []
         popcount = 0
         while True:
             for i in range(popcount):
@@ -463,7 +479,7 @@ class PokemonRed(Game):
         
         self.DEX_FAMILIES = dex_families
         self.DEX = dex
-        print 'Picked {} mons for dex'.format(len(dex))
+        #print 'Picked {} mons for dex'.format(len(dex))
         
         # sprites
         #self.patch_sprite_loading_routine() # no need to do that, our hack will use
@@ -501,7 +517,7 @@ class PokemonRed(Game):
         
         rom.seek(banki*0x4000)
         rom.write(bank)
-        print "Wrote sprites (last bank: {})".format(hex(banki))
+        #print "Wrote sprites (last bank: {})".format(hex(banki))
         
         # base stats
         self.rom.seek(self.symbols["BaseStats"]) # BulbasaurBaseStats
@@ -748,6 +764,12 @@ class PokemonRed(Game):
         for mon in sample(self.POKEMON, 16):
             self.rom.writebyte(mon)
         
+        intromon = self.random_pokemon()
+        self.rom.seek(self.symbols['TextCommandSoundsIntroMon'])
+        self.rom.writebyte(intromon)
+        self.rom.seek(self.symbols['OakSpeechPokemon'])
+        self.rom.writebyte(intromon)
+        
         
         if self.debug:
             self.rom.seek(0x00ff)
@@ -764,9 +786,9 @@ http://tinyurl.com
          /pkmnrandom"""
         else:
             text = """                    
-This is a DEBUG     
- ROM. Do not distri-
- bute.              
+This is a DEBUG ROM.
+Do not distribute!  
+                    
 Get your ROM at:    
 http://tinyurl.com  
          /pkmnrandom"""
