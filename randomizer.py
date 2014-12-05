@@ -175,7 +175,7 @@ class PokemonRed(Game):
         pokedex_size = SelectField('Pokédex size', choices=dechoices("151:151;251:251"), default="251")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
-        trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizer the Pokémon opponent trainers carry.  The levels stay the same.")
+        trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizes the Pokémon opponent trainers carry.  The levels stay the same.")
         wild_pokemon = BooleanField("Randomize wild Pokémon", description="This option randomizes the ten possible wild Pokémon in each area.")
         ow_pokemon = BooleanField("Randomize gift and overworld Pokémon", description="This randomizes the Pokémon you can encounter on the overworld and the Pokémon you can receive or buy.")
         movesets = BooleanField("Randomize movesets", description="Randomizes which moves Pokémon learn, both on level up and TM compatibility.")
