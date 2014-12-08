@@ -17,6 +17,7 @@ def datetime_format(value, format='%Y-%m-%d  %H:%M'):
     if isinstance(value, int): value = datetime.fromtimestamp(value)
     return value.strftime(format)
 
+global debug
 debug = False
 
 from git import *
@@ -62,7 +63,7 @@ def generate():
     form = game.Form(request.form)
     for field in form:
         game.choices[field.name] = field.data
-    filename = game.produce(filename=request.form.get('filename'))
+    filename = game.produce(filename=request.form.get('filename'), debug=debug)
     
     endtime = time.time()
     cooldowns[ip] = endtime

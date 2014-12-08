@@ -87,6 +87,7 @@ class Game():
     CHARS = {}
     
     def __init__(self):
+        self.debug = False
         self.choices = {}
         for field in self.Form():
             self.choices[field.id] = None
@@ -106,14 +107,14 @@ class Game():
     def finalize(self):
         pass
     
-    def produce(self, filename):
+    def produce(self, filename, debug=False):
         # First let's make sure the input is right...
         #for option, value in self.choices.items():
         #    if option not hasattr(self, "opt_"+option):
         #        raise ValueError('No such option for the game {}: {}'.format(self.name, option))
         
         # Now let's make us a ROM
-        
+        self.debug = debug
         original = open('roms/'+self.filename, 'rb').read()
         if filename:
             filename = filename.replace('/', '_').replace('\0', '').replace('?', '_').replace('#', '_')
@@ -161,6 +162,7 @@ class PokemonRed(Game):
     symbols = symfile("roms/pokered.sym")
     
     form_expanded_by = {'game_pokemon_source_generations': 'game_pokemon',
+        'pokedex_size': 'game_pokemon',
         'special_conversion': 'game_pokemon',
         'force_attacking': 'movesets',
         'move_rules': 'movesets',
@@ -170,9 +172,10 @@ class PokemonRed(Game):
         
         game_pokemon = BooleanField("Include Pokémon from later generations", description="This is exactly what it sounds like.  150 random Pokémon from all 721 will be picked and inserted into the game's Pokédex.  Check it out.")
         game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=list(enumerate("I II III IV V VI".split(), start=1)), default=(1, 2, 3, 4, 5, 6), coerce=int, description="This lets you somewhat whitelist the Pokémon you'd like to see.  Try playing with just Gen V, for example!")
+        pokedex_size = SelectField('Pokédex size', choices=dechoices("151:151;251:251"), default="251")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")
-        trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizer the Pokémon opponent trainers carry.  The levels stay the same.")
+        trainer_pokemon = BooleanField("Randomize trainer Pokémon", description="This option randomizes the Pokémon opponent trainers carry.  The levels stay the same.")
         wild_pokemon = BooleanField("Randomize wild Pokémon", description="This option randomizes the ten possible wild Pokémon in each area.")
         ow_pokemon = BooleanField("Randomize gift and overworld Pokémon", description="This randomizes the Pokémon you can encounter on the overworld and the Pokémon you can receive or buy.")
         movesets = BooleanField("Randomize movesets", description="Randomizes which moves Pokémon learn, both on level up and TM compatibility.")
@@ -192,7 +195,7 @@ class PokemonRed(Game):
     
     presets = {
         'race': {
-            'starter_pokemon': 'randomize', 'ow_pokemon': True,
+            'starter_pokemon': 'randomize', 'ow_pokemon': True, 'pokedex_size': "251",
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
@@ -201,7 +204,7 @@ class PokemonRed(Game):
             'soundtrack': True
         },
         'casual': {
-            'starter_pokemon': 'three-basic', 'ow_pokemon': True,
+            'starter_pokemon': 'three-basic', 'ow_pokemon': True, 'pokedex_size': "251", 
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
             'force_attacking': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
@@ -210,7 +213,7 @@ class PokemonRed(Game):
             'soundtrack': True
         },
         'classic': {
-            'starter_pokemon': 'randomize', 'ow_pokemon': True,
+            'starter_pokemon': 'randomize', 'ow_pokemon': True, 
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
             'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
@@ -220,12 +223,7 @@ class PokemonRed(Game):
     }
     
     CHARS = {' ': 127, '!': 231, '#': 84, '&': 233, "'": 224, "é": 0xba, "É": 0xba, "'d": 208, "'l": 209, "'m": 210, "'r": 211, "'s": 212, "'t": 213, "'v": 214, '(': 154, ')': 155, ',': 244, '-': 227, '.': 232, '/': 243, '0': 246, '1': 247, '2': 248, '3': 249, '4': 250, '5': 251, '6': 252, '7': 253, '8': 254, '9': 255, ':': 156, ';': 157, '?': 230, '@': 80, 'A': 128, 'B': 129, 'C': 130, 'D': 131, 'E': 132, 'F': 133, 'G': 134, 'H': 135, 'I': 136, 'J': 137, 'K': 138, 'L': 139, 'M': 140, 'N': 141, 'O': 142, 'P': 143, 'Q': 144, 'R': 145, 'S': 146, 'T': 147, 'U': 148, 'V': 149, 'W': 150, 'X': 151, 'Y': 152, 'Z': 153, '[': 158, ']': 159, 'a': 160, 'b': 161, 'c': 162, 'd': 163, 'e': 164, 'f': 165, 'g': 166, 'h': 167, 'i': 168, 'j': 169, 'k': 170, 'l': 171, 'm': 172, 'n': 173, 'o': 174, 'p': 175, 'q': 176, 'r': 177, 's': 178, 't': 179, 'u': 180, 'v': 181, 'w': 182, 'x': 183, 'y': 184, 'z': 185, '¥': 240, '×': 241, '…': 117, '№': 116, '→': 235, '─': 122, '│': 124, '┌': 121, '┐': 123, '└': 125, '┘': 126, '▶': 237, '▷': 236, '▼': 238, '♀': 245, '♂': 239, '<': 0xe1, '>': 0xe2,}
-    
-    POKEMON = [0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x33, 0x35, 0x36, 0x37, 0x39, 0x3a, 0x3b, 0x3c, 0x40, 0x41, 0x42, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x52, 0x53, 0x54, 0x55, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70, 0x71, 0x72, 0x74, 0x75, 0x76, 0x77, 0x78, 0x7b, 0x7c, 0x7d, 0x7e, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x88, 0x8a, 0x8b, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99, 0x9a, 0x9b, 0x9d, 0x9e, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xad, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4, 0xb9, 0xba, 0xbb, 0xbc, 0xbd, 0xbe]
-    # TODO fix mew???
-    
-    POKEMON_MAPPINGS = [None, 112, 115, 32, 35, 21, 100, 34, 80, 2, 103, 108, 102, 88, 94, 29, 31, 104, 111, 131, 59, 151, 130, 90, 72, 92, 123, 120, 9, 127, 114, None, None, 58, 95, 22, 16, 79, 64, 75, 113, 67, 122, 106, 107, 24, 47, 54, 96, 76, None, 126, None, 125, 82, 109, None, 56, 86, 50, 128, None, None, None, 83, 48, 149, None, None, None, 84, 60, 124, 146, 144, 145, 132, 52, 98, None, None, None, 37, 38, 25, 26, None, None, 147, 148, 140, 141, 116, 117, None, None, 27, 28, 138, 139, 39, 40, 133, 136, 135, 134, 66, 41, 23, 46, 61, 62, 13, 14, 15, None, 85, 57, 51, 49, 87, None, None, 10, 11, 12, 68, None, 55, 97, 42, 150, 143, 129, None, None, 89, None, 99, 91, None, 101, 36, 110, 53, 105, None, 93, 63, 65, 17, 18, 121, 1, 3, 73, None, 118, 119, None, None, None, None, 77, 78, 19, 20, 33, 30, 74, 137, 142, None, 81, None, None, 4, 7, 5, 8, 6, None, None, None, None, 43, 44, 45, 69, 70, 71]
-    
+        
     STARTER_OFFESTS = [[symbols['OaksLabScript8'] + 0x4, symbols['OaksLabText2'] + 0xc, symbols['OaksLabText4'] + 0x2, symbols['ReadTrainer'] + 0xa5, symbols['StarterMons_50faf'] + 0x4, symbols['StarterMons_510d9'] + 0x4],
 [symbols['OaksLabScript8'] + 0x8, symbols['OaksLabScript11'] + 0xf, symbols['OaksLabText3'] + 0xc, symbols['OaksLabText2'] + 0x2, symbols['CeruleanCityScript1'] + 0x2a, symbols['StarterMons_50faf'] + 0x0, symbols['StarterMons_510d9'] + 0x0, symbols['SilphCo7Script3'] + 0x2d, symbols['PokemonTower2Text1'] + 0x2f, symbols['SSAnne2Script1'] + 0x20, symbols['GaryScript2'] + 0x34],
 [symbols['OaksLabScript11'] + 0x17, symbols['OaksLabText4'] + 0xc, symbols['OaksLabText3'] + 0x2, symbols['CeruleanCityScript1'] + 0x32, symbols['ReadTrainer'] + 0x9f, symbols['StarterMons_50faf'] + 0x2, symbols['StarterMons_510d9'] + 0x2, symbols['SilphCo7Script3'] + 0x35, symbols['PokemonTower2Text1'] + 0x37, symbols['SSAnne2Script1'] + 0x28, symbols['GaryScript2'] + 0x3c]]
@@ -259,6 +257,7 @@ class PokemonRed(Game):
     
     DEX_FAMILIES = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30, 31], [32, 33, 34], [35, 36], [37, 38], [39, 40], [41, 42], [43, 44, 45], [46, 47], [48, 49], [50, 51], [52, 53], [54, 55], [56, 57], [58, 59], [60, 61, 62], [63, 64, 65], [66, 67, 68], [69, 70, 71], [72, 73], [74, 75, 76], [77, 78], [79, 80], [81, 82], [83], [84, 85], [86, 87], [88, 89], [90, 91], [92, 93, 94], [95], [96, 97], [98, 99], [100, 101], [102, 103], [104, 105], [106, 107], [108], [109, 110], [111, 112], [113], [114], [115], [116, 117], [118, 119], [120, 121], [122], [123], [124], [125], [126], [127], [128], [129, 130], [131], [132], [133, 134, 135, 136], [137], [138, 139], [140, 141], [142], [143], [144], [145], [146], [147, 148, 149], [150], [151]]
     DEX = range(1, 152)
+    POKEMON = range(1, 152)
     
     OBJECT_MAPS = "CeladonCity PalletTown ViridianCity PewterCity CeruleanCity VermilionCity FuchsiaCity BluesHouse VermilionHouse3 IndigoPlateauLobby SilphCo4 SilphCo5 SilphCo6 CinnabarIsland Route1 OaksLab ViridianMart School ViridianHouse PewterHouse1 PewterHouse2 CeruleanHouseTrashed CeruleanHouse1 BikeShop LavenderHouse1 LavenderHouse2 NameRater VermilionHouse1 VermilionDock CeladonMansion5 FuchsiaMart SaffronHouse1 SaffronHouse2 DiglettsCaveRoute2 Route2House Route5Gate Route6Gate Route7Gate Route8Gate UndergroundPathEntranceRoute8 PowerPlant DiglettsCaveEntranceRoute11 Route16House Route22Gate BillsHouse LavenderTown ViridianPokecenter Mansion1 RockTunnel1 SeafoamIslands1 SSAnne3 VictoryRoad3 RocketHideout1 RocketHideout2 RocketHideout3 RocketHideout4 RocketHideoutElevator SilphCoElevator SafariZoneEast SafariZoneNorth SafariZoneCenter SafariZoneRestHouse1 SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 UnknownDungeon2 UnknownDungeon3 RockTunnel2 SeafoamIslands2 SeafoamIslands3 SeafoamIslands4 SeafoamIslands5 Route7 RedsHouse1F CeladonMart3 CeladonMart4 CeladonMartRoof CeladonMartElevator CeladonMansion1 CeladonMansion2 CeladonMansion3 CeladonMansion4 CeladonPokecenter CeladonGym CeladonGameCorner CeladonMart5 CeladonPrizeRoom CeladonDiner CeladonHouse CeladonHotel MtMoonPokecenter RockTunnelPokecenter Route11Gate Route11GateUpstairs Route12Gate Route12GateUpstairs Route15Gate Route15GateUpstairs Route16Gate Route16GateUpstairs Route18Gate Route18GateUpstairs MtMoon1 MtMoon3 SafariZoneWest SafariZoneSecretHouse BattleCenterM TradeCenterM Route22 Route20 Route23 Route24 Route25 IndigoPlateau SaffronCity VictoryRoad2 MtMoon2 SilphCo7 Mansion2 Mansion3 Mansion4 Route2 Route3 Route4 Route5 Route9 Route13 Route14 Route17 Route19 Route21 VermilionHouse2 CeladonMart2 FuchsiaHouse3 DayCareM Route12House SilphCo8 Route6 Route8 Route10 Route11 Route12 Route15 Route16 Route18 FanClub SilphCo2 SilphCo3 SilphCo10 Lance HallofFameRoom RedsHouse2F Museum1F Museum2F PewterGym PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter LavenderMart VermilionPokecenter VermilionMart VermilionGym CopycatsHouse2F FightingDojo SaffronGym SaffronMart SilphCo1 SaffronPokecenter ViridianForestExit Route2Gate ViridianForestEntrance UndergroundPathEntranceRoute5 UndergroundPathEntranceRoute6 UndergroundPathEntranceRoute7 UndergroundPathEntranceRoute7Copy SilphCo9 VictoryRoad1 PokemonTower1 PokemonTower2 PokemonTower3 PokemonTower4 PokemonTower5 PokemonTower6 PokemonTower7 CeladonMart1 ViridianForest SSAnne1 SSAnne2 SSAnne4 SSAnne5 SSAnne6 SSAnne7 SSAnne8 SSAnne9 SSAnne10 UndergroundPathNS UndergroundPathWE DiglettsCave SilphCo11 ViridianGym PewterMart UnknownDungeon1 CeruleanHouse2 FuchsiaHouse1 FuchsiaPokecenter FuchsiaHouse2 SafariZoneEntrance FuchsiaGym FuchsiaMeetingRoom CinnabarGym Lab1 Lab2 Lab3 Lab4 CinnabarPokecenter CinnabarMart CopycatsHouse1F Gary Lorelei Bruno Agatha".split()
     HIDDEN_OBJECT_MAPS = "RedsHouse2F BluesHouse OaksLab ViridianPokecenter ViridianMart ViridianSchool ViridianGym Museum1F PewterGym PewterMart PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter VermilionPokecenter VermilionGym CeladonMansion2 CeladonPokecenter CeladonGym GameCorner CeladonHotel FuchsiaPokecenter FuchsiaGym CinnabarGym CinnabarPokecenter SaffronGym MtMoonPokecenter RockTunnelPokecenter BattleCenter TradeCenter ViridianForest MtMoon3 IndigoPlateau Route25 Route9 SSAnne6 SSAnne10 RocketHideout1 RocketHideout3 RocketHideout4 SaffronPokecenter PokemonTower5 Route13 SafariZoneEntrance SafariZoneWest SilphCo5F SilphCo9F CopycatsHouse2F UnknownDungeon1 UnknownDungeon3 PowerPlant SeafoamIslands3 SeafoamIslands5 Mansion1 Mansion3 Route23 VictoryRoad2 Unused6F BillsHouse ViridianCity SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 Route15GateUpstairs LavenderHouse1 CeladonMansion5 FightingDojo Route10 IndigoPlateauLobby CinnabarLab4 BikeShop Route11 Route12 Mansion2 Mansion4 SilphCo11F Route17 UndergroundPathNs UndergroundPathWe CeladonCity SeafoamIslands4 VermilionCity CeruleanCity Route4".split()
@@ -309,6 +308,10 @@ class PokemonRed(Game):
     OW_SPRITES = "red blue oak bug_catcher slowbro lass black_hair_boy_1 little_girl bird fat_bald_guy gambler black_hair_boy_2 girl hiker foulard_woman gentleman daisy biker sailor cook bike_shop_guy mr_fuji giovanni rocket medium waiter erika mom_geisha brunette_girl lance oak_aide oak_aide rocker swimmer white_player gym_helper old_person mart_guy fisher old_medium_woman nurse cable_club_woman mr_masterball lapras_giver warden ss_captain fisher2 blackbelt guard mom balding_guy young_boy gameboy_kid gameboy_kid clefairy agatha bruno lorelei seel".split()
     
     SONGS = [line.split() for line in open("data/songs.txt").read().split('\n') if line.strip()]
+    for song in SONGS:
+        for s in song:
+            if "Music_"+s not in symbols:
+                raise KeyError("Music_{} not in symfile. There could be a typo, or the symbol wasn't exported.".format(s))
     SONG_SOURCES = yaml.load(open("data/song_sources.yaml"))
     
     def random_pokemon(self):
@@ -329,10 +332,10 @@ class PokemonRed(Game):
     def opt_starter_pokemon(self, mode):
         #starters = [self.random_pokemon() for i in range(3)]
         if mode == 'randomize':
-            starters = sample(self.POKEMON, 3)
+            starters = [1+self.DEX.index(mon) for mon in sample(self.DEX, 3)]
         elif mode == 'basics':
             families = sample(self.DEX_FAMILIES, 3)
-            starters = [self.POKEMON_MAPPINGS.index(1+self.DEX.index(family[0])) for family in families]
+            starters = [1+self.DEX.index(family[0]) for family in families]
         elif mode == 'three-basic':
             three_stage_families = []
             for family in self.DEX_FAMILIES:
@@ -341,9 +344,9 @@ class PokemonRed(Game):
                 families = sample(three_stage_families, 3)
             else:
                 families = [choice(three_stage_families) for i in range(3)]
-            starters = [self.POKEMON_MAPPINGS.index(1+self.DEX.index(family[0])) for family in families]
+            starters = [1+self.DEX.index(family[0]) for family in families]
         elif mode == 'single':
-            starters = [choice(self.POKEMON)]*3
+            starters = [choice(self.DEX)]*3
         
         for i, starter in enumerate(starters):
             for offset in self.STARTER_OFFESTS[i]:
@@ -422,6 +425,7 @@ class PokemonRed(Game):
     #        rom.read(2)
     
     def opt_game_pokemon(self):
+        original_151 = not all(self.choices[c] for c in "wild_pokemon trainer_pokemon ow_pokemon starter_pokemon".split())
         families = minidex['evolution_chains']
         
         generation_ranges = (range(  1, 152), range(152, 252), range(252, 387),
@@ -430,7 +434,6 @@ class PokemonRed(Game):
             allowed_pokemon = sum((r for gen, r in enumerate(generation_ranges, 1) if gen in self.choices['game_pokemon_source_generations']), [])
         else:
             allowed_pokemon = range(1, 723)
-        if 151 in allowed_pokemon: allowed_pokemon.remove(151)
         
         families_ = []
         # this could be rewritten as a generator but meh
@@ -443,9 +446,18 @@ class PokemonRed(Game):
         
         families = families_
         
-        dex_size = min(150, len(allowed_pokemon))
-        dex = []
-        dex_families = []
+        dex_size = min(251 if self.choices['pokedex_size']=="251" else 151, len(allowed_pokemon))
+        if original_151:
+            dex = self.DEX
+            dex_families = self.DEX_FAMILIES
+            for family in families:
+                for mon in dex:
+                    if mon in family:
+                        family.remove(mon)
+            families = [f for f in families if f]
+        else:
+            dex = []
+            dex_families = []
         popcount = 0
         while True:
             for i in range(popcount):
@@ -460,22 +472,10 @@ class PokemonRed(Game):
             popcount += 1
             if popcount > 10: popcount = 10 # wtf
         
-        
-        pokemon = []
-        for i, dexnum in enumerate(self.POKEMON_MAPPINGS):
-            if dexnum and dexnum <= len(dex):
-                pokemon.append(i)
-        self.POKEMON = pokemon
+        self.POKEMON = range(1, len(dex)+1)
         
         types = self.TYPES
         rom = self.rom
-        '''while len(dex) < 150:
-            randfamily = choice(minidex['evolution_chains'])
-            #if randfamily[0] >= 719: continue # Diancie, no sprites
-            if randfamily[0] == 151: continue
-            if randfamily not in dex_families and len(dex)+len(randfamily) <= 150:
-                dex += randfamily
-                dex_families.append(randfamily)'''
         
         self.DEX_FAMILIES = dex_families
         self.DEX = dex
@@ -485,7 +485,7 @@ class PokemonRed(Game):
         #self.patch_sprite_loading_routine() # no need to do that, our hack will use
                                              # the bank if it's present, otherwise default behavior
         pokemon_sprite_addresses = []
-        banki = 0x38 # 38: first new sprite bank
+        banki = self.symbols['SpriteBank1']//0x4000 # 38: first new sprite bank
         # when symfiles are better use BANK(SpriteBank1)
         bank = b""
         for num in dex:
@@ -523,11 +523,11 @@ class PokemonRed(Game):
         self.rom.seek(self.symbols["BaseStats"]) # BulbasaurBaseStats
         for i, mon in enumerate(dex):
             data = minidex['pokemon'][mon]
-            rom.read(1)
-            rom.write(chr(data['stats'][0]))
-            rom.write(chr(data['stats'][1]))
-            rom.write(chr(data['stats'][2]))
-            rom.write(chr(data['stats'][5]))
+            rom.writebyte(i+1)
+            rom.writebyte(data['stats'][0])
+            rom.writebyte(data['stats'][1])
+            rom.writebyte(data['stats'][2])
+            rom.writebyte(data['stats'][5])
             spa, spd = data['stats'][3], data['stats'][4]
             special = {
                 'average': (spa + spd) // 2,
@@ -536,14 +536,14 @@ class PokemonRed(Game):
                 'higher': max(spa, spd),
                 'random': choice((spa, spd))
             }[self.choices['special_conversion'] or 'average']
-            rom.write(chr(special)) # special
-            rom.write(chr(types[data['type0']]))
-            rom.write(chr(types[data['type1']] if data['type1'] else types[data['type0']]))
-            rom.write(chr(data['catch_rate']))
-            rom.write(chr(min(data['exp_yield'], 255)))
-            rom.write(chr(0x77)) # sprite dimensions
-            rom.write(struct.pack(b"<H", pokemon_sprite_addresses[i][0][1] + 0x4000))
-            rom.write(struct.pack(b"<H", pokemon_sprite_addresses[i][1][1] + 0x4000))
+            rom.writebyte(special) # special
+            rom.writebyte(types[data['type0']])
+            rom.writebyte(types[data['type1']] if data['type1'] else types[data['type0']])
+            rom.writebyte(data['catch_rate'])
+            rom.writebyte(min(data['exp_yield'], 255))
+            rom.writebyte(0x77) # sprite dimensions
+            rom.writeshort(pokemon_sprite_addresses[i][0][1] + 0x4000)
+            rom.writeshort(pokemon_sprite_addresses[i][1][1] + 0x4000)
             
             moves = [0, 0, 0, 0]
             num_moves = sum([level == 1 for level in data['moveset']])
@@ -557,67 +557,47 @@ class PokemonRed(Game):
                 moves[movei] = move
             assert len(moves) == 4
             for move in moves:
-                rom.write(chr(move))
+                rom.writebyte(move)
             
-            rom.write(chr({1:5, 2:0, 3:4, 4:3, 5:6, 6:7}[data['growth_rate']]))
-            """
-1	slow
-2	medium
-3	fast
-4	medium-slow
-5	slow-then-very-fast (erratic)
-6	fast-then-very-slow (fluctuating)"""
-            """
-GrowthRateTable: ; 5901d (16:501d)
-	db $11,$00,$00,$00 ; medium fast      n^3
-	db $34,$0A,$00,$1E ; (unused?)    3/4 n^3 + 10 n^2         - 30
-	db $34,$14,$00,$46 ; (unused?)    3/4 n^3 + 20 n^2         - 70
-	db $65,$8F,$64,$8C ; medium slow: 6/5 n^3 - 15 n^2 + 100 n - 140
-	db $45,$00,$00,$00 ; fast:        4/5 n^3
-	db $54,$00,$00,$00 ; slow:        5/4 n^3"""
+            rom.writebyte({1:5, 2:0, 3:4, 4:3, 5:6, 6:7}[data['growth_rate']])
             
             for x in range(7): # TMHM
-                rom.write(chr(randint(0, 255)))
+                rom.writebyte(randint(0, 255))
             
-            rom.write(chr(pokemon_sprite_addresses[i][0][0]))
+            rom.writebyte(pokemon_sprite_addresses[i][0][0])
         
         # evos moves
         evo_move_pointers = []
-        self.rom.seek(self.symbols['Mon112_EvosMoves']) # First mon's EvosMoves in the modified rom
-        # there is about $200 free bytes usually, we can hopefully fit in that
-        for i in range(1, 191):
+        self.rom.seek(self.symbols['Mon001_EvosMoves'])
+        for dexnum in range(1, len(dex)):
             evo_move_pointers.append(rom.tell())
-            dexnum = self.POKEMON_MAPPINGS[i]
-            if dexnum and dexnum != 151 and dexnum <= len(dex):
-                num = dex[dexnum - 1]
-                # evolutions
-                for evolution in minidex['pokemon'][num]['evolutions']:
-                    if evolution['evolved_species'] not in dex: continue
-                    trigger = {'shed': 'level-up'}.get(evolution['trigger'], evolution['trigger'])
-                    if trigger == "trade" and self.choices['change_trade_evos']:
-                        trigger = 'level-up'
-                        evolution['minimum_level'] = 42
-                    
-                    rom.write(chr(self.EVOLUTION_METHODS[trigger]))
-                    if trigger == 'level-up':
-                        rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
-                    elif trigger == 'use-item':
-                        rom.write(chr(self.EVO_ITEMS.get(evolution['trigger_item'], self.EVO_ITEMS['moon-stone'])))
-                        rom.writebyte(1)
-                    elif trigger == 'trade':
-                        rom.writebyte(1)
-                    rom.writebyte(self.POKEMON_MAPPINGS.index(1+dex.index(evolution['evolved_species'])))
-                rom.writebyte(0)
-                # moves
-                for movei, level in enumerate(minidex['pokemon'][num]['moveset']):
-                    if level != 1 and (movei <= 2 or movei % 2 == 0):
-                        rom.write(chr(level))
-                        rom.write(chr(choice(self.FAIR_MOVES)))
-                rom.writebyte(0) # end moves
-            if dexnum == 151:
-                rom.writebyte(0)
-                rom.writebyte(0)
-        assert rom.tell() < 0x3c000, hex(rom.tell())
+            num = dex[dexnum - 1]
+            # evolutions
+            for evolution in minidex['pokemon'][num]['evolutions']:
+                if evolution['evolved_species'] not in dex: continue
+                trigger = {'shed': 'level-up'}.get(evolution['trigger'], evolution['trigger'])
+                if trigger == "trade" and self.choices['change_trade_evos']:
+                    trigger = 'level-up'
+                    evolution['minimum_level'] = 42
+                
+                rom.write(chr(self.EVOLUTION_METHODS[trigger]))
+                if trigger == 'level-up':
+                    rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
+                elif trigger == 'use-item':
+                    rom.write(chr(self.EVO_ITEMS.get(evolution['trigger_item'], self.EVO_ITEMS['moon-stone'])))
+                    rom.writebyte(1)
+                elif trigger == 'trade':
+                    rom.writebyte(1)
+                rom.writebyte(1+dex.index(evolution['evolved_species']))
+            rom.writebyte(0)
+            # moves
+            for movei, level in enumerate(minidex['pokemon'][num]['moveset']):
+                if level != 1 and (movei <= 2 or movei % 2 == 0):
+                    rom.write(chr(level))
+                    rom.write(chr(choice(self.FAIR_MOVES)))
+            rom.writebyte(0) # end moves
+        # TODO we still need an assert here!
+        #assert rom.tell() < 0x3c000, hex(rom.tell())
         
         rom.seek(self.symbols["EvosMovesPointerTable"])
         for evo_move_pointer in evo_move_pointers:
@@ -625,16 +605,8 @@ GrowthRateTable: ; 5901d (16:501d)
         
         self.rom.seek(self.symbols["MonsterNames"]) # MonsterNames
         
-        for i in range(1, 191):
-            dexnum = self.POKEMON_MAPPINGS[i]
-            if dexnum and dexnum != 151 and dexnum <= len(dex):
-                num = dex[dexnum - 1]
-                self.write_string(minidex['pokemon'][num]['name'].upper(), 10)
-            elif dexnum == 151:
-                self.write_string("MEW", 10)
-            else:
-                self.rom.read(10)
-                #self.write_string("SANQUII", 10)
+        for num in dex:
+            self.write_string(minidex['pokemon'][num]['name'].upper(), 10)
         
         # menu icons
         self.rom.seek(self.symbols["MonPartyData"]) # what a bad name
@@ -792,16 +764,35 @@ GrowthRateTable: ; 5901d (16:501d)
         for mon in sample(self.POKEMON, 16):
             self.rom.writebyte(mon)
         
+        intromon = self.random_pokemon()
+        self.rom.seek(self.symbols['TextCommandSoundsIntroMon'])
+        self.rom.writebyte(intromon)
+        self.rom.seek(self.symbols['OakSpeechPokemon'])
+        self.rom.writebyte(intromon)
+        
+        
+        if self.debug:
+            self.rom.seek(0x00ff)
+            self.rom.writebyte(0xff)
         
         self.rom.seek(self.symbols['TitleScreenText'])
-        text = ""
-        text += "{:20}".format("")
-        text += "{:20}".format("Randomizer options")
-        text += "{:20}".format("are returning soon!")
-        text += "{:20}".format("")
-        text += "{:20}".format("This ROM comes from:")
-        text += "{:20}".format("http://tinyurl.com")
-        text += "{:20}".format("         /pkmnrandom")
+        if not self.debug:
+            text = """                   
+Randomizer options  
+are returning soon! 
+                    
+This ROM comes from:
+http://tinyurl.com  
+         /pkmnrandom"""
+        else:
+            text = """                    
+This is a DEBUG ROM.
+Do not distribute!  
+                    
+Get your ROM at:    
+http://tinyurl.com  
+         /pkmnrandom"""
+        text = text.replace('\n', '')
         text += "@"
         '''text = ""
         text += "{:20}".format("Randomizer options:")
