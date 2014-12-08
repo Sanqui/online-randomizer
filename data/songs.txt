@@ -35,9 +35,9 @@ BikeRiding Bicycle
 Surfing Surf Pinballseelstage
 RBYGameCorner GameCorner TCG2GameCorner
 IntroBattle GoldSilverOpening2
-Dungeon1 Route2 SproutTower
-Dungeon2 MtMoon UnionCave DarkCave
-Dungeon3 RocketHideout
+Dungeon1 RocketHideout
+Dungeon2 Route2 SproutTower
+Dungeon3 MtMoon UnionCave DarkCave
 CinnabarMansion BurnedTower
 PokemonTower TinTower
 SilphCo RocketTheme TCG2HereComesGR

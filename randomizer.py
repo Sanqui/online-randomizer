@@ -545,6 +545,7 @@ class PokemonRed(Game):
             rom.writeshort(pokemon_sprite_addresses[i][0][1] + 0x4000)
             rom.writeshort(pokemon_sprite_addresses[i][1][1] + 0x4000)
             
+            
             moves = [0, 0, 0, 0]
             num_moves = sum([level == 1 for level in data['moveset']])
             for movei in range(min(num_moves, 4)):
@@ -777,7 +778,7 @@ class PokemonRed(Game):
         
         self.rom.seek(self.symbols['TitleScreenText'])
         if not self.debug:
-            text = """                   
+            text = """                    
 Randomizer options  
 are returning soon! 
                     
