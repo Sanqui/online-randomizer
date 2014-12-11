@@ -57,6 +57,8 @@ form table ul li {margin:0; padding:0; display:inline;}
 
 i.icon {opacity:0.5; cursor:default;}
 
+p {text-indent:4%;}
+
     </style>
     
     <!--<script src="http://code.jquery.com/jquery-1.11.1.js"></script>-->
@@ -197,7 +199,7 @@ $(document).ready(function(){
 </head>
 <body>
     {% if debug %}
-        <div class="ui label top right attached red" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;">NOT THE REAL THING!</div>
+        <div class="ui label top right attached red" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;"><u>DEBUG VERSION</u><br>NOT THE REAL THING!</div>
     {% endif %}
     <div class="main">
         <div class="ui label top right attached red big" style="font-weight:bold;">BETA</div>
@@ -249,9 +251,18 @@ $(document).ready(function(){
         </div>
     </div>
     <div class="ui divider"></div>
+        <h3 class="ui header">What is this?</h3>
+        <p>This is a randomizer - a program which changes up data inside the game in a random manner.  In a Pokémon game, for example, you can have three random starter Pokémon - and random wild Pokémon on each route or with other trainers, too.  In case you enjoy a game, but want to mix it up a little while playing it again, a randomizer is a wonderful tool.
+        <p>Another popular use of Pokémon randomizers is to race the game.  With a group of other people, you make one randomized ROM for every player, and start playing together, seeing who beats a gym leader or the game first.  These games often happen on <a href="http://speedrunslive.com/">SpeedRunsLive</a>.
+        <p>This randomizer a little experimental.  Among other things, it supports randomizing <i>any single Pokémon</i> into Pokémon Red.  Here's a screenshot:
+        <p style="text-align:center;"><img src="static/screenshots/red00.png" style="width:160px; height:144px; margin: auto;">
+        <p>Feel free to try it out!  That being said, the randomizer is still a work in progress, and sometimes I add shiny new features without testing them thoroughly first.  If you intend to do a long-term playthrough, like a Let's Play, <strong>maybe hold off a little bit</strong> until the randomizer becomes more stable.  Wouldn't want your game to crash near the end of the game!
+        <p>Eventually, I intend on supporting a variety of different games.  I also have a lot of ideas coming for Pokémon Red, like random maps.  By the way, if you want to randomize Pokémon games other than Red, check out Dabomstew's <a href="http://pokehacks.dabomstew.com/randomizer/">Universal Randomizer</a>.
+        <p>Got an idea of your own?  Or want to report a nasty bug?  Feel free to throw any feedback at me: <a href="mailto:gsanky@gmail.com">gsanky@gmail.com</a> - Thanks!
     <footer class="ui two column  aligned relaxed grid basic segment">
         <div class="column">
             <h3 class="ui header">Credits</h3>
+            <
             <h4>Gen 1 style sprites</h4>
             <ul>
                 <li><a href="http://project-rbydex.deviantart.com/">Project-RBYDex</a>
