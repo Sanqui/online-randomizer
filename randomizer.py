@@ -460,8 +460,6 @@ class PokemonRed(Game):
             dex_families = []
         popcount = 0
         while True:
-            for i in range(popcount):
-                dex_families.pop()
             shuffle(families)
             for family in families:
                 if family not in dex_families and len(dex) + len(family) <= dex_size:
@@ -469,8 +467,7 @@ class PokemonRed(Game):
                     dex += family
                 if len(dex) == dex_size: break
             if len(dex) == dex_size: break
-            popcount += 1
-            if popcount > 10: popcount = 10 # wtf
+            break
         
         self.POKEMON = range(1, len(dex)+1)
         
@@ -660,7 +657,7 @@ class PokemonRed(Game):
             for i in range(7):
                 rom.writebyte(randint(0, 255))
             
-            rom.seek(self.symbols["EvosMovesPointerTable"] - 2 + (2 * self.POKEMON_MAPPINGS.index(1+i)))
+            rom.seek(self.symbols["EvosMovesPointerTable"] + (2 * (1+i)))
             rom.seek((self.symbols["EvosMovesPointerTable"] // 0x4000) * 0x4000 + (rom.readshort() % 0x4000))
             # evolutions
             while rom.readbyte() != 0: pass
