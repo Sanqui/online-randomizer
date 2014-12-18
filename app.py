@@ -27,7 +27,7 @@ assert repo.bare == False
 import randomizer
 
 games_json = {}
-for game in randomizer.games:
+for game in randomizer.randomizer_games:
     game_json = {}
     game_json['name'] = game.name
     game_json['options'] = {} #game.options
@@ -54,7 +54,7 @@ def generate():
     
     starttime = time.time()
     gameid = request.form.get('game')
-    for g in randomizer.games:
+    for g in randomizer.randomizer_games:
         #print g.identifier, gameid
         if g.identifier == gameid:
             Game = g
@@ -81,7 +81,7 @@ def index():
             commits.append(commit)
         if len(commits) == 10: break
     
-    return render_template("index.html", games=randomizer.games, games_json=games_json, debug=debug, randlogo=random.randint(1, 28), commits=commits)
+    return render_template("index.html", games=randomizer.randomizer_games, games_json=games_json, debug=debug, randlogo=random.randint(1, 28), commits=commits)
 
 if __name__ == "__main__":
     print "Running..."
