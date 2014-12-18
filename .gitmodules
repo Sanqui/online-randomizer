@@ -1,0 +1,3 @@
+[submodule "sources/pokered"]
+	path = sources/pokered
+	url = git@github.com:Sanqui/pokered-randomizer.git

@@ -10,6 +10,7 @@ import os
 import datetime
 import struct
 import random
+import subprocess
 from random import randint, choice, sample, triangular, shuffle # choice we redefine
 
 def choice(x): return random.choice(tuple(x))
