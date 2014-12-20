@@ -16,6 +16,7 @@ menu_icons = ['mon ball helix fairy bird water bug grass snake quadruped -'.spli
 
 subprocess.check_call("make -C sources/pokered/ red".split(' '))
 subprocess.check_call("cp sources/pokered/pokered.gbc roms/pokered.gbc".split(' '))
+subprocess.check_call("cp sources/pokered/pokered.sym roms/pokered.sym".split(' '))
 
 @randomizer_games.append
 class PokemonRed(Game):
