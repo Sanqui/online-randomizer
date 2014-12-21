@@ -19,6 +19,10 @@ import yaml
 
 from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, RadioField, SelectField, SelectMultipleField, BooleanField, HiddenField, SubmitField, Field, validators, ValidationError, widgets
 
+from git import *
+repo = Repo(".")
+assert repo.bare == False
+
 def dechoices(c):
     return [x.split(':') for x in c.split(';')]
 

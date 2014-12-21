@@ -653,7 +653,9 @@ are returning soon!
                     
 This ROM comes from:
 http://tinyurl.com  
-         /pkmnrandom"""
+         /pkmnrandom
+                    
+(commit:)           """
         else:
             text = """                    
 This is a DEBUG ROM.
@@ -661,8 +663,15 @@ Do not distribute!
                     
 Get your ROM at:    
 http://tinyurl.com  
-         /pkmnrandom"""
+         /pkmnrandom
+                    
+(commit:)           """
         text = text.replace('\n', '')
+        for commit in repo.iter_commits('master'):
+            if not commit.message.startswith("Merge "):
+                break
+        
+        text += commit.hexsha[0:20]
         text += "@"
         '''text = ""
         text += "{:20}".format("Randomizer options:")
