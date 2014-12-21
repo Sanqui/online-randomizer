@@ -110,6 +110,14 @@ function set_preset(presetid) {
         }
     }
     update_all_expanded()
+    // update_all_expanded has checked everyting newly expanded
+    // even if it was unchecked above
+    // Until this is fixed, we need to do two iterations
+    for (option in preset) {
+        if (preset[option] === false) {
+            $("#"+option).prop('checked', false)
+        }
+    }
 }
 
 function generate() {
