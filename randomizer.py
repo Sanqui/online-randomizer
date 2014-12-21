@@ -62,7 +62,10 @@ class ROM(file):
         return struct.unpack(b'<H', self.read(2))[0]
     
     def writebyte(self, byte):
-        self.write(struct.pack(b'<B', byte))
+        if byte < 0:
+            self.write(struct.pack(b'<b', byte))
+        else:
+            self.write(struct.pack(b'<B', byte))
     def writeshort(self, short):
         self.write(struct.pack(b'<H', short))
 
@@ -78,17 +81,6 @@ def symfile(filename):
             addr = bank*0x4000 + offset % 0x4000
             symbols[label] = addr
     return symbols
-
-class ROM(file):
-    def readbyte(self):
-        return ord(self.read(1))
-    def readshort(self):
-        return struct.unpack(b'<H', self.read(2))[0]
-    
-    def writebyte(self, byte):
-        self.write(struct.pack(b'<B', byte))
-    def writeshort(self, short):
-        self.write(struct.pack(b'<H', short))
 
 class Game():
     name = "Game"

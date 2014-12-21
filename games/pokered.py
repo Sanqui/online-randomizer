@@ -30,7 +30,8 @@ class PokemonRed(Game):
         'special_conversion': 'game_pokemon',
         'force_attacking': 'movesets',
         'move_rules': 'movesets',
-        'soundtrack_sources': 'soundtrack'}
+        'soundtrack_sources': 'soundtrack',
+        'pitches': 'soundtrack',}
     class Form(Form):        
         h_randomize = Heading("Randomizations")
         
@@ -51,6 +52,7 @@ class PokemonRed(Game):
         field_items = SelectField('Field items', choices=dechoices(":-;shuffle-no-tm:Shuffle, keep TMs;shuffle:Shuffle;random-no-tm:Random, keep TMs;random:Random;random-key:Random with Key Items"), default="", description="This option randomizes what you can find lying on the ground.")
         soundtrack = BooleanField("Randomize the soundtrack", description="Picks random fitting songs for each song in Red.  Enjoy listening to new music while you play.")
         soundtrack_sources = MultiCheckboxField("Sources", choices=dechoices("red:Red;crystal:Crystal;side:TCG & Pinball;demixes:Demixes;fan:Fan (Prism)"), default="red crystal side demixes fan".split(), description="If there's no alternative song choose, you get the Red song.")
+        pitches = BooleanField("Randomize note pitch", description="Randomly transposes musical pieces in the game.  May sound pretty bad at times, but is mostly just interesting.")
     
         h_tweaks = Heading("Tweaks")
         change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
@@ -65,7 +67,7 @@ class PokemonRed(Game):
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True,
-            'soundtrack': True
+            'soundtrack': True, 'pitches': False
         },
         'casual': {
             'starter_pokemon': 'three-basic', 'ow_pokemon': True, 'pokedex_size': "251", 
@@ -74,7 +76,7 @@ class PokemonRed(Game):
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle', 'update_types': True,
-            'soundtrack': True
+            'soundtrack': True, 'pitches': False
         },
         'classic': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True, 
@@ -82,7 +84,8 @@ class PokemonRed(Game):
             'force_attacking': True,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'trainer_classes': False,
-            'tms': True, 'field_items': '', 'update_types': False
+            'tms': True, 'field_items': '', 'update_types': False,
+            'music': False, 'pitches': False
         }
     }
     
@@ -624,6 +627,12 @@ class PokemonRed(Game):
             song = "Music_"+choice(songs)
             self.rom.writebyte(self.symbols[song] / 0x4000)
             self.rom.writeshort((self.symbols[song] % 0x4000) + 0x4000)
+    
+    def opt_pitches(self):
+        self.rom.seek(self.symbols["SongTranspositions"])
+        for i in range(46):
+            # lazy
+            self.rom.writebyte(int(triangular(-4, 4, 0)))
     
     def opt_instant_text(self):
         self.rom.seek(0x00ff)
