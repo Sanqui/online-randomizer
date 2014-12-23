@@ -4,7 +4,7 @@ Pokecenter PokemonCenter MobileCenter
 RBYGym Gym
 Cities1 ViridianCity CherrygroveCity
 Cities2 AzaleaTown CeruleanGSC
-Celadon CeladonCity GoldenrodCity
+Celadon CeladonCity GoldenrodCity JubilifeCity
 Cinnabar CinnabarGSC CinnabarRemix
 Vermilion VermilionCity VioletCity
 Lavender LavenderTown EcruteakCity
@@ -14,17 +14,17 @@ MeetRival LookRival TCGRonald
 MuseumGuy ShowMeAround
 SafariZone Evolution
 PkmnHealed HealPokemon
-Routes1 Route1 Route29
-Routes2 Route3 Route30 NuggetBridge
-Routes3 Route12 Route36 Route206
-Routes4 Route26 Route37
+Routes1 Route1 Route29 Route201
+Routes2 Route3 Route30 NuggetBridge Route203
+Routes3 Route12 Route36 Route205
+Routes4 Route26 Route37 Route206
 RBYIndigoPlateau IndigoPlateau
 GymLeaderBattle KantoGymBattle JohtoGymBattle KantoGymLeaderRemix NaljoGymBattle
 TrainerBattle KantoTrainerBattle JohtoTrainerBattle RivalBattle RocketBattle JohtoGSC SinnohTrainerBattle
 WildBattle KantoWildBattle JohtoWildBattle JohtoWildBattleNight SinnohWildBattle NaljoWildBattle
 FinalBattle ChampionBattle FrontierBrain
-DefeatedTrainer TrainerVictory
-DefeatedWildMon WildPokemonVictory
+DefeatedTrainer TrainerVictory WinTrainerSinnoh
+DefeatedWildMon WildPokemonVictory WinPokeSinnoh
 DefeatedGymLeader GymLeaderVictory
 RBYTitleScreen TitleScreen TCGTitleScreen TCG2TitleScreen Pinballtitlescreen
 RBYCredits Credits TCGCredits TCG2Credits Pinballendcredits
@@ -36,7 +36,7 @@ Surfing Surf Pinballseelstage
 RBYGameCorner GameCorner TCG2GameCorner
 IntroBattle GoldSilverOpening2
 Dungeon1 RocketHideout
-Dungeon2 Route2 SproutTower
+Dungeon2 Route2 SproutTower EternaForest
 Dungeon3 MtMoon UnionCave DarkCave
 CinnabarMansion BurnedTower
 PokemonTower TinTower

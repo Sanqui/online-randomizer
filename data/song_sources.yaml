@@ -156,7 +156,12 @@ red:
 demixes:
     - SinnohWildBattle
     - SinnohTrainerBattle
+    - WinPokeSinnoh
+    - WinTrainerSinnoh
     - JubilifeCity
+    - Route201
+    - Route203
+    - Route205
     - Route206
     - PokeRadar
     - CeruleanGSC
@@ -168,6 +173,7 @@ demixes:
     - JohtoGSC
     - KantoGymLeaderRemix
     - FrontierBrainBattle
+    - EternaForest
 fan:
     - NaljoWildBattle
     - NaljoGymBattle
