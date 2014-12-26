@@ -96,12 +96,12 @@ crystal:
     - MobileAdapter
     - BuenasPassword
     - LookMysticalMan
-red:
     - CrystalOpening
     - BattleTowerTheme
     - SuicuneBattle
     - BattleTowerLobby
     - MobileCenter
+red:
     - IntroBattle
     - YellowIntro
     - RBYTitleScreen
