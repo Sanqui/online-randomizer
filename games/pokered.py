@@ -98,7 +98,7 @@ class PokemonRed(Game):
     #  Dabomstew: eevee, hitmonchan, hitmonlee, 6 voltorbs, 2 electrodes, legendary birds, mewtwo, 2 snorlaxes, aerodactyl, omanyte, kabuto, lapras, magikarp, 6 game corner pokemon
     GIFT_POKEMON_ADDRESSES = [symbols['CeladonMansion5Text2']+3, symbols['FightingDojoText6']+18, symbols['FightingDojoText7']+18,
         ] + [symbols['PowerPlantObject'] + 22 + 8*i  for i in range(9)] + [
-        symbols['SeafoamIslands5Object'] + 45, symbols['VictoryRoad2Object'] + 79, symbols['UnknownDungeon3Object'] + 15,
+        symbols['SeafoamIslands5Object'] + 44, symbols['VictoryRoad2Object'] + 78, symbols['UnknownDungeon3Object'] + 15,
         symbols['Route12Script0'] + 25-2, symbols['Route16Script0'] + 25-2, 
         symbols['GiveFossilToCinnabarLab'] + 0x5e, symbols['GiveFossilToCinnabarLab'] + 0x62, symbols['GiveFossilToCinnabarLab'] + 0x66,
         symbols['SilphCo7Text1'] + 0x1f, symbols['MtMoonPokecenterText4'] + 0x34]
