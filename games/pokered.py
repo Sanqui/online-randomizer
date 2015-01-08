@@ -130,6 +130,7 @@ class PokemonRed(Game):
     HIDDEN_OBJECT_MAPS = "RedsHouse2F BluesHouse OaksLab ViridianPokecenter ViridianMart ViridianSchool ViridianGym Museum1F PewterGym PewterMart PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter VermilionPokecenter VermilionGym CeladonMansion2 CeladonPokecenter CeladonGym GameCorner CeladonHotel FuchsiaPokecenter FuchsiaGym CinnabarGym CinnabarPokecenter SaffronGym MtMoonPokecenter RockTunnelPokecenter BattleCenter TradeCenter ViridianForest MtMoon3 IndigoPlateau Route25 Route9 SSAnne6 SSAnne10 RocketHideout1 RocketHideout3 RocketHideout4 SaffronPokecenter PokemonTower5 Route13 SafariZoneEntrance SafariZoneWest SilphCo5F SilphCo9F CopycatsHouse2F UnknownDungeon1 UnknownDungeon3 PowerPlant SeafoamIslands3 SeafoamIslands5 Mansion1 Mansion3 Route23 VictoryRoad2 Unused6F BillsHouse ViridianCity SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 Route15GateUpstairs LavenderHouse1 CeladonMansion5 FightingDojo Route10 IndigoPlateauLobby CinnabarLab4 BikeShop Route11 Route12 Mansion2 Mansion4 SilphCo11F Route17 UndergroundPathNs UndergroundPathWe CeladonCity SeafoamIslands4 VermilionCity CeruleanCity Route4".split()
     FIELD_ITEMS = []
     EXISTING_CRIES = []
+    TMS = []
     
     with ROM('roms/'+filename, 'rb') as rom:
         for objectmap in OBJECT_MAPS:
@@ -173,6 +174,10 @@ class PokemonRed(Game):
         rom.seek(symbols['CryHeaders'])
         for i in range(251):
             EXISTING_CRIES.append(rom.read(6))
+        
+        rom.seek(symbols['TechnicalMachines'])
+        for i in range(50):
+            TMS.append(ord(rom.read(1)))
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
     
@@ -192,6 +197,7 @@ class PokemonRed(Game):
     
     #":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"
     def opt_move_rules(self, rule):
+        if not self.choices['movesets']: return
         if rule in ('no-hms', 'no-hms-broken'):
             self.FAIR_MOVES -= {57, 70, 19, 15, 148}
             self.ATTACKING_MOVES -= {57, 70, 19, 15, 148}
@@ -284,10 +290,10 @@ class PokemonRed(Game):
     def opt_tms(self):
         rom = self.rom
         rom.seek(self.symbols["TechnicalMachines"])
-        tms = sample(self.FAIR_MOVES, 50)
-        for move in tms:
-            rom.write(chr(move))
-    opt_tms.layer = 5
+        self.TMS = sample(self.FAIR_MOVES, 50)
+        for move in self.TMS:
+            rom.writebyte(move)
+    opt_tms.layer = -2
         
     #def opt_ow_sprites(self):
     #    rom = self.rom
@@ -416,24 +422,45 @@ class PokemonRed(Game):
             rom.writeshort(pokemon_sprite_addresses[i][1][1] + 0x4000)
             
             
-            moves = [0, 0, 0, 0]
-            num_moves = sum([level == 1 for level in data['moveset']])
-            for movei in range(min(num_moves, 4)):
-                if movei == 0 and self.choices['force_attacking']:
-                    move = choice(self.ATTACKING_MOVES)
-                else:
-                    move = choice(self.FAIR_MOVES)
-                while move in moves:
-                    move = choice(self.FAIR_MOVES)
-                moves[movei] = move
+            if self.choices['movesets']:
+                moves = [0, 0, 0, 0]
+                num_moves = sum([level == 1 for level in data['learnset']])
+                for movei in range(min(num_moves, 4)):
+                    if movei == 0 and self.choices['force_attacking']:
+                        move = choice(self.ATTACKING_MOVES)
+                    else:
+                        move = choice(self.FAIR_MOVES)
+                    while move in moves:
+                        move = choice(self.FAIR_MOVES)
+                    moves[movei] = move
+            else:
+                moves = []
+                for level, move in data['learnset']:
+                    if level == 1 and move in self.FAIR_MOVES:
+                        moves.append(move)
+                moves = moves[-4:]
+                if not moves:
+                    moves.append(0x21) # Tackle XXX
+                while len(moves) < 4:
+                    moves.append(0)
+            
             assert len(moves) == 4
             for move in moves:
                 rom.writebyte(move)
             
             rom.writebyte({1:5, 2:0, 3:4, 4:3, 5:6, 6:7}[data['growth_rate']])
             
-            for x in range(7): # TMHM
-                rom.writebyte(randint(0, 255))
+            if self.choices['movesets']:
+                for x in range(7): # TMHM
+                    rom.writebyte(randint(0, 255))
+            else:
+                tm_compatibility = [move in data['moveset'] for move in self.TMS]
+                for j in range(7):
+                    byte = 0
+                    for k in range(8):
+                        if j*8+k < len(tm_compatibility) and tm_compatibility[j*8+k]:
+                            byte |= 1 << k
+                    rom.writebyte(byte)
             
             rom.writebyte(pokemon_sprite_addresses[i][0][0])
         
@@ -462,10 +489,16 @@ class PokemonRed(Game):
                 rom.writebyte(1+dex.index(evolution['evolved_species']))
             rom.writebyte(0)
             # moves
-            for movei, level in enumerate(minidex['pokemon'][num]['moveset']):
-                if level != 1 and (movei <= 2 or movei % 2 == 0):
-                    rom.write(chr(level))
-                    rom.write(chr(choice(self.FAIR_MOVES)))
+            for movei, m in enumerate(minidex['pokemon'][num]['learnset']):
+                level, move = m
+                if self.choices['movesets']:
+                    if level != 1 and (movei <= 2 or movei % 2 == 0):
+                        rom.writebyte(level)
+                        rom.writebyte(choice(self.FAIR_MOVES))
+                else:
+                    if level != 1 and move in self.FAIR_MOVES:
+                        rom.writebyte(level)
+                        rom.writebyte(move)
             rom.writebyte(0) # end moves
         # TODO we still need an assert here!
         #assert rom.tell() < 0x3c000, hex(rom.tell())
