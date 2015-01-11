@@ -58,7 +58,8 @@ class PokemonRed(Game):
     
         h_tweaks = Heading("Tweaks")
         change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
-        update_types = BooleanField("Update types to X/Y", description="This uption updates the whole type table to Gen 6's, including the new types.  If you don't choose this, types that didn't exist in Gen 1 become Normal.")
+        update_types = BooleanField("Update types to X/Y", description="This option updates the whole type table to Gen 6's, including the new types.  If you don't choose this, types that didn't exist in Gen 1 become Normal.")
+        update_moves = BooleanField("Update moves to X/Y", description="This option PARTIALLY updates move data to Gen 6's.  Effects are NOT affected!")
         instant_text = BooleanField("Instant text speed", description="This makes all dialogue display instantly, instead of delaying after each letter.")
     
     presets = {
@@ -68,7 +69,7 @@ class PokemonRed(Game):
             'force_attacking': True, 'force_four_moves': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
-            'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True,
+            'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True, 'update_moves': True,
             'soundtrack': True, 'pitches': False
         },
         'casual': {
@@ -77,7 +78,7 @@ class PokemonRed(Game):
             'force_attacking': True, 'force_four_moves': False, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
-            'tms': True, 'field_items': 'shuffle', 'update_types': True,
+            'tms': True, 'field_items': 'shuffle', 'update_types': True, 'update_moves': True,
             'soundtrack': True, 'pitches': False
         },
         'classic': {
@@ -86,7 +87,7 @@ class PokemonRed(Game):
             'force_attacking': True, 'force_four_moves': False,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'trainer_classes': False,
-            'tms': True, 'field_items': '', 'update_types': False,
+            'tms': True, 'field_items': '', 'update_types': False, 'update_moves': False,
             'music': False, 'pitches': False
         }
     }
@@ -227,7 +228,7 @@ class PokemonRed(Game):
                 families = [choice(three_stage_families) for i in range(3)]
             starters = [1+self.DEX.index(family[0]) for family in families]
         elif mode == 'single':
-            starters = [choice(self.DEX)]*3
+            starters = [1+self.DEX.index(choice(self.DEX))]*3
         
         for i, starter in enumerate(starters):
             for offset in self.STARTER_OFFESTS[i]:
@@ -598,6 +599,11 @@ class PokemonRed(Game):
                 self.rom.writebyte({0:0x00, 50: 0x05, 200: 0x20}[factor])
         self.rom.writebyte(0xff)
     opt_update_types.layer = -5
+        
+    def opt_update_moves(self):
+        # This is quite nasty.
+        self.rom.seek(self.symbols["LoadHLMoves"] + 1)
+        self.rom.writeshort((self.symbols["Gen6Moves"] % 0x4000) + 0x4000)
         
     def opt_trainer_classes(self):
         classes = range(len(self.TRAINER_CLASSES))
