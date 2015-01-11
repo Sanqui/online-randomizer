@@ -424,7 +424,7 @@ class PokemonRed(Game):
             
             if self.choices['movesets']:
                 moves = [0, 0, 0, 0]
-                num_moves = sum([level == 1 for level in data['learnset']])
+                num_moves = sum([level == 1 for level, move in data['learnset']])
                 for movei in range(min(num_moves, 4)):
                     if movei == 0 and self.choices['force_attacking']:
                         move = choice(self.ATTACKING_MOVES)
@@ -577,6 +577,7 @@ class PokemonRed(Game):
                 rom.writebyte(move)
     
     def opt_update_types(self):
+        self.TYPES = self.TYPES.copy()
         self.TYPES.update({'dark': 0x1b, 'steel': 0x09, 'fairy': 0x1c})
         # TODO this needs to be per-instance!  we're updating the class
         # TYPES dictionary now which is wrong
