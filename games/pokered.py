@@ -29,6 +29,7 @@ class PokemonRed(Game):
         'pokedex_size': 'game_pokemon',
         'special_conversion': 'game_pokemon',
         'force_attacking': 'movesets',
+        'force_four_moves': 'movesets',
         'move_rules': 'movesets',
         'soundtrack_sources': 'soundtrack',
         'pitches': 'soundtrack',}
@@ -45,6 +46,7 @@ class PokemonRed(Game):
         ow_pokemon = BooleanField("Randomize gift and overworld Pokémon", description="This randomizes the Pokémon you can encounter on the overworld and the Pokémon you can receive or buy.")
         movesets = BooleanField("Randomize movesets", description="Randomizes which moves Pokémon learn, both on level up and TM compatibility.")
         force_attacking = BooleanField("Always start with an attacking move", description="Don't pick this if you enjoy having Splash as your only move.")
+        force_four_moves = BooleanField("Always start with four moves", description="This makes more Pokémon usable on average.")
         move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken", description="This opinion is useful for races, for example, to prevent skipping the whole Nugget Bridge and S. S. Anne if somebody gets lucky with Cut.")
         tms = BooleanField("Randomize the moves TMs teach", description="Note that Gym Leaders will still announce their old TM for now, so make sure to check!")
         trainer_classes = BooleanField("Shuffle trainer classes", description="This affects payouts too, but not AI.")
@@ -63,7 +65,7 @@ class PokemonRed(Game):
         'race': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True, 'pokedex_size': "251",
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
-            'force_attacking': True, 'change_trade_evos': True,
+            'force_attacking': True, 'force_four_moves': True, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True,
@@ -72,7 +74,7 @@ class PokemonRed(Game):
         'casual': {
             'starter_pokemon': 'three-basic', 'ow_pokemon': True, 'pokedex_size': "251", 
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
-            'force_attacking': True, 'change_trade_evos': True,
+            'force_attacking': True, 'force_four_moves': False, 'change_trade_evos': True,
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle', 'update_types': True,
@@ -81,7 +83,7 @@ class PokemonRed(Game):
         'classic': {
             'starter_pokemon': 'randomize', 'ow_pokemon': True, 
             'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
-            'force_attacking': True,
+            'force_attacking': True, 'force_four_moves': False,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'trainer_classes': False,
             'tms': True, 'field_items': '', 'update_types': False,
@@ -424,7 +426,10 @@ class PokemonRed(Game):
             
             if self.choices['movesets']:
                 moves = [0, 0, 0, 0]
-                num_moves = sum([level == 1 for level, move in data['learnset']])
+                if self.choices['force_four_moves']:
+                    num_moves = 4
+                else:
+                    num_moves = sum([level == 1 for level, move in data['learnset']])
                 for movei in range(min(num_moves, 4)):
                     if movei == 0 and self.choices['force_attacking']:
                         move = choice(self.ATTACKING_MOVES)
