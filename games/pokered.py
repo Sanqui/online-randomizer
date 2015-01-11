@@ -227,7 +227,7 @@ class PokemonRed(Game):
                 families = [choice(three_stage_families) for i in range(3)]
             starters = [1+self.DEX.index(family[0]) for family in families]
         elif mode == 'single':
-            starters = [choice(self.DEX)]*3
+            starters = [1+self.DEX.index(choice(self.DEX))]*3
         
         for i, starter in enumerate(starters):
             for offset in self.STARTER_OFFESTS[i]:
