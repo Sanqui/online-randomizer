@@ -59,7 +59,8 @@ class PokemonRed(Game):
         h_tweaks = Heading("Tweaks")
         change_trade_evos = BooleanField("Perform trade evos at lv. 42", description="This changes all trade evolutions into standard level-up ones.  Doesn't work in classic (no new Pokémon) yet!")
         update_types = BooleanField("Update types to X/Y", description="This option updates the whole type table to Gen 6's, including the new types.  If you don't choose this, types that didn't exist in Gen 1 become Normal.")
-        update_moves = BooleanField("Update moves to X/Y", description="This option PARTIALLY updates move data to Gen 6's.  Effects are NOT affected!")
+        update_moves = BooleanField("Update moves to X/Y", description="This option partially updates move data to Gen 6's.  Effects are not affected.")
+        new_moves = BooleanField("Add new moves", description="This option adds some 45 new moves from later games.  Not all effects are perfectly accurate.  Forces updating moves to X/Y.")
         instant_text = BooleanField("Instant text speed", description="This makes all dialogue display instantly, instead of delaying after each letter.")
     
     presets = {
@@ -124,6 +125,7 @@ class PokemonRed(Game):
     MAXMOVE = 0xa4 # substitute
     FAIR_MOVES = set(range(1, MAXMOVE+1)) - {144} # +1 ? # transform
     ATTACKING_MOVES = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0d, 0x0f, 0x10, 0x11, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x28, 0x29, 0x2a, 0x2c, 0x31, 0x32, 0x33, 0x34, 0x35, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x4b, 0x4c, 0x50, 0x52, 0x53, 0x54, 0x55, 0x57, 0x58, 0x59, 0x5b, 0x5d, 0x5e, 0x62, 0x63, 0x65, 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f, 0x80, 0x81, 0x82, 0x83, 0x84, 0x88, 0x8c, 0x8d, 0x8f, 0x91, 0x92, 0x95, 0x98, 0x9a, 0x9b, 0x9d, 0x9e, 0xa1, 0xa3}
+    NEW_MOVES = ~bidict({204: 409, 205: 183, 206: 457, 207: 350, 208: 317, 209: 337, 210: 530, 211: 242, 212: 399, 213: 400, 214: 313, 215: 418, 216: 430, 217: 442, 218: 211, 219: 232, 220: 605, 221: 577, 222: 583, 223: 585, 224: 441, 225: 305, 226: 198, 227: 523, 228: 405, 229: 224, 230: 324, 231: 404, 232: 247, 233: 325, 234: 425, 235: 421, 236: 331, 237: 412, 238: 532, 239: 345, 240: 402, 241: 352, 242: 332, 243: 403, 244: 355, 245: 609, 246: 351, 247: 192, 248: 200})
     
     DEX_FAMILIES = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30, 31], [32, 33, 34], [35, 36], [37, 38], [39, 40], [41, 42], [43, 44, 45], [46, 47], [48, 49], [50, 51], [52, 53], [54, 55], [56, 57], [58, 59], [60, 61, 62], [63, 64, 65], [66, 67, 68], [69, 70, 71], [72, 73], [74, 75, 76], [77, 78], [79, 80], [81, 82], [83], [84, 85], [86, 87], [88, 89], [90, 91], [92, 93, 94], [95], [96, 97], [98, 99], [100, 101], [102, 103], [104, 105], [106, 107], [108], [109, 110], [111, 112], [113], [114], [115], [116, 117], [118, 119], [120, 121], [122], [123], [124], [125], [126], [127], [128], [129, 130], [131], [132], [133, 134, 135, 136], [137], [138, 139], [140, 141], [142], [143], [144], [145], [146], [147, 148, 149], [150], [151]]
     DEX = range(1, 152)
@@ -198,6 +200,14 @@ class PokemonRed(Game):
     def random_pokemon(self):
         return choice(self.POKEMON)
     
+    def get_move(self, move):
+        if move <= self.MAXMOVE and move in self.FAIR_MOVES:
+            return move
+        elif self.choices['new_moves'] and move in self.NEW_MOVES.keys():
+            return self.NEW_MOVES[move]
+        else:
+            return None
+    
     #":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"
     def opt_move_rules(self, rule):
         if not self.choices['movesets']: return
@@ -209,6 +219,12 @@ class PokemonRed(Game):
             self.ATTACKING_MOVES -= {0x52, 0x93} # Dragon Rage, Spore
         return
     opt_move_rules.layer = -5
+    
+    def opt_new_moves(self):
+        self.opt_update_moves()
+        self.FAIR_MOVES = self.FAIR_MOVES.copy()
+        self.FAIR_MOVES.update(set(self.NEW_MOVES.values()))
+    opt_new_moves.layer = -6
     
     #:Keep,randomize:Random,basics:Random basics,three-basic:Random three stage basics,single:Single random (yellow style)
     def opt_starter_pokemon(self, mode):
@@ -442,8 +458,8 @@ class PokemonRed(Game):
             else:
                 moves = []
                 for level, move in data['learnset']:
-                    if level == 1 and move in self.FAIR_MOVES:
-                        moves.append(move)
+                    if level == 1 and self.get_move(move):
+                        moves.append(self.get_move(move))
                 moves = moves[-4:]
                 if not moves:
                     moves.append(0x21) # Tackle XXX
@@ -460,7 +476,7 @@ class PokemonRed(Game):
                 for x in range(7): # TMHM
                     rom.writebyte(randint(0, 255))
             else:
-                tm_compatibility = [move in data['moveset'] for move in self.TMS]
+                tm_compatibility = [(move if move <= self.MAXMOVE else self.NEW_MOVES[:move]) in data['moveset'] for move in self.TMS]
                 for j in range(7):
                     byte = 0
                     for k in range(8):
@@ -502,9 +518,9 @@ class PokemonRed(Game):
                         rom.writebyte(level)
                         rom.writebyte(choice(self.FAIR_MOVES))
                 else:
-                    if level != 1 and move in self.FAIR_MOVES:
+                    if level != 1 and self.get_move(move):
                         rom.writebyte(level)
-                        rom.writebyte(move)
+                        rom.writebyte(self.get_move(move))
             rom.writebyte(0) # end moves
         # TODO we still need an assert here!
         #assert rom.tell() < 0x3c000, hex(rom.tell())
@@ -698,6 +714,13 @@ class PokemonRed(Game):
         if self.debug:
             self.rom.seek(0x00ff)
             self.rom.writebyte(0xff)
+        else:
+            self.rom.seek(0x00ff)
+            byte = self.rom.readbyte()
+            byte &= 0b11111101
+            self.rom.seek(0x00ff)
+            self.rom.writebyte(byte)
+            
         
         self.rom.seek(self.symbols['TitleScreenText'])
         if not self.debug:
