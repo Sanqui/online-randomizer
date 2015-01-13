@@ -5,7 +5,7 @@
   {%- else -%}
       <tr data-expandedby="{{game.form_expanded_by[field.name]}}" class="{{'expanded' if game.form_expanded_by[field.name] else ''}}">
           <td class="not-i td-label">{%- if field.name != "submit" -%}{{- field.label -}}{%- endif -%}</td>
-          <td><i class="{{'help' if field.description else ''}} icon popup" data-content="{{field.description}}"></i></td>
+          <td><i class="{{'help' if field.description else ''}} icon help-popup" data-content="{{field.description}}"></i></td>
           <td class="not-i td-input">{{ field(**kwargs)|safe }}
           {% if field.errors %}
             <ul class=errors>
@@ -59,6 +59,8 @@ form table ul li {margin:0; padding:0; display:inline;}
 i.icon {opacity:0.5; cursor:default;}
 
 p {text-indent:4%;}
+
+.unstable {font-weight:bold !important; font-size:16px !important; cursor: default;}
 
     </style>
     
@@ -197,10 +199,11 @@ $(document).ready(function(){
         render_options(window.location.hash.substr(1), true)
     }
     
-    $('.popup').popup({
+    $('.help-popup').popup({
         position: 'top left',
         delay: 50,
     })
+    $('.unstable').popup({position: 'bottom center'})
     
     update_all_expanded(true)
 })
@@ -208,10 +211,10 @@ $(document).ready(function(){
 </head>
 <body>
     {% if debug %}
-        <div class="ui label top right attached red" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;"><u>DEBUG VERSION</u><br>NOT THE REAL THING!</div>
+        <div class="ui label top left attached red unstable" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;"><u>DEBUG VERSION</u><br>NOT THE REAL THING!</div>
     {% endif %}
     <div class="main">
-        <div class="ui label top right attached red big" style="font-weight:bold;">BETA</div>
+        <div class="ui label top right attached red big unstable" data-content="New features are added often. The game may crash! Save your game often.">UNSTABLE</div>
         <!-- https://i.imgur.com/Z0k2D3y.png -->
         <h1 class="logo"><img src="static/logos/{{'{:02}'.format(randlogo)}}.png" alt="Online Randomizer"></h1>
         <h2 class="ui header">Pick a game:</h2>
