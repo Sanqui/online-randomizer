@@ -61,6 +61,7 @@ class PokemonRed(Game):
         update_types = BooleanField("Update types to X/Y", description="This option updates the whole type table to Gen 6's, including the new types.  If you don't choose this, types that didn't exist in Gen 1 become Normal.")
         update_moves = BooleanField("Update moves to X/Y", description="This option partially updates move data to Gen 6's.  Effects are not affected.")
         new_moves = BooleanField("Add new moves", description="This option adds some 45 new moves from later games.  Not all effects are perfectly accurate.  Forces updating moves to X/Y.")
+        yellow_gym_leaders = BooleanField("Yellow gym leader levels", description="Changes Gym leader levels to match Yellow, mostly making them tougher.")
         instant_text = BooleanField("Instant text speed", description="This makes all dialogue display instantly, instead of delaying after each letter.")
     
     presets = {
@@ -71,6 +72,8 @@ class PokemonRed(Game):
             'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True, 'update_moves': True,
+            'new_moves': True,
+            'yellow_gym_leaders': True,
             'soundtrack': True, 'pitches': False
         },
         'casual': {
@@ -80,6 +83,8 @@ class PokemonRed(Game):
             'special_conversion': 'average', 'move_rules': '', 'cries': True,
             'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
             'tms': True, 'field_items': 'shuffle', 'update_types': True, 'update_moves': True,
+            'new_moves': True,
+            'yellow_gym_leaders': True,
             'soundtrack': True, 'pitches': False
         },
         'classic': {
@@ -88,7 +93,9 @@ class PokemonRed(Game):
             'force_attacking': True, 'force_four_moves': False,
             'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
             'trainer_classes': False,
+            'yellow_gym_leaders': False,
             'tms': True, 'field_items': '', 'update_types': False, 'update_moves': False,
+            'new_moves': False,
             'music': False, 'pitches': False
         }
     }
@@ -254,8 +261,8 @@ class PokemonRed(Game):
     
     def opt_trainer_pokemon(self):
         rom = self.rom
-        rom.seek(self.symbols["YoungsterData"])
-        while rom.tell() < self.symbols["TrainerAI"]:
+        rom.seek(self.symbols["TrainerData"])
+        while rom.tell() < self.symbols["TrainerDataEnd"]:
             first_byte = ord(rom.read(1))
             if first_byte == 0xff:
                 while ord(rom.read(1)) != 0:
@@ -264,7 +271,35 @@ class PokemonRed(Game):
                 while ord(rom.read(1)) != 0:
                     rom.seek(rom.tell()-1)
                     rom.writebyte(self.random_pokemon())
-                
+    opt_starter_pokemon.layer = 1
+    
+    def opt_yellow_gym_leaders(self):
+        # A hack.
+        rom = self.rom
+        YELLOW_GYM_LEADER_LEVELS = (
+            (10, 12,  ), # lowered
+            (18, 21,  ), # unchanged
+            (28,  0,  0,  ),
+            (30, 32, 32,  ),
+            (44, 46, 48, 50,  ),
+            (48, 50, 54,  0,  ),
+            (50, 50, 50,  ),
+        )
+        YELLOW_GYM_GIOVANNI_LEVELS = (50, 53, 53, 55, 55, )
+        rom.seek(self.symbols["BrockData"])
+        for levels in YELLOW_GYM_LEADER_LEVELS:
+            self.rom.writebyte(0xff)
+            for level in levels:
+                self.rom.writebyte(level)
+                self.rom.readbyte()
+            self.rom.writebyte(0x00)
+        rom.seek(self.symbols["Giovanni3Data"])
+        self.rom.writebyte(0xff)
+        for level in YELLOW_GYM_GIOVANNI_LEVELS:
+            self.rom.writebyte(level)
+            self.rom.readbyte()
+    opt_starter_pokemon.layer = 2
+    
     def opt_wild_pokemon(self):
         rom = self.rom
         rom.seek(self.symbols["Route1Mons"])
