@@ -47,7 +47,7 @@ class PokemonRed(Game):
         movesets = BooleanField("Randomize movesets", description="Randomizes which moves Pokémon learn, both on level up and TM compatibility.")
         force_attacking = BooleanField("Always start with an attacking move", description="Don't pick this if you enjoy having Splash as your only move.")
         force_four_moves = BooleanField("Always start with four moves", description="This makes more Pokémon usable on average.")
-        move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No Dragon Rage, Spore;no-hms-broken:No HMs, Dragon Rage, Spore"), default="no-hms-broken", description="This opinion is useful for races, for example, to prevent skipping the whole Nugget Bridge and S. S. Anne if somebody gets lucky with Cut.")
+        move_rules = SelectField('Fair random move rules', choices=dechoices(":All moves;no-hms:No HMs;no-broken:No OHKO, Dragon Rage, Spore;no-hms-broken:No HMs, OHKO, Dragon Rage, Spore"), default="no-hms-broken", description="This opinion is useful for races, for example, to prevent skipping the whole Nugget Bridge and S. S. Anne if somebody gets lucky with Cut.")
         tms = BooleanField("Randomize the moves TMs teach", description="Note that Gym Leaders will still announce their old TM for now, so make sure to check!")
         trainer_classes = BooleanField("Shuffle trainer classes", description="This affects payouts too, but not AI.")
         ow_sprites = BooleanField("Shuffle overworld sprites", description="This is purely visual and for fun.")
@@ -223,8 +223,9 @@ class PokemonRed(Game):
             self.FAIR_MOVES -= {57, 70, 19, 15, 148}
             self.ATTACKING_MOVES -= {57, 70, 19, 15, 148}
         if rule in ('no-broken', 'no-hms-broken'):
-            self.FAIR_MOVES -= {0x52, 0x93} # Dragon Rage, Spore
-            self.ATTACKING_MOVES -= {0x52, 0x93} # Dragon Rage, Spore
+            # Dragon Rage, Spore, GUILLOTINE HORN_DRILL FISSURE
+            self.FAIR_MOVES -= {0x52, 0x93, 0x0c, 0x1e, 0x5a}
+            self.ATTACKING_MOVES -= {0x52, 0x93, 0x0c, 0x1e, 0x5a}
         return
     opt_move_rules.layer = -5
     
