@@ -95,12 +95,17 @@ class Game():
     
     CHARS = {}
     
+    ROM_FLAGS = []
+    
     def __init__(self):
         self.debug = False
         self.choices = {}
         for field in self.Form():
             self.choices[field.id] = None
-        pass
+        
+        self.rom_flags = {}
+        for flag in self.ROM_FLAGS:
+            self.rom_flags[flag] = False
     
     def opt_dummy(self):
         return True

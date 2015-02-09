@@ -100,6 +100,8 @@ class PokemonRed(Game):
         }
     }
     
+    ROM_FLAGS = "instant_text debug updated_moves".split()
+    
     CHARS = {' ': 127, '!': 231, '#': 84, '&': 233, "'": 224, "é": 0xba, "É": 0xba, "'d": 208, "'l": 209, "'m": 210, "'r": 211, "'s": 212, "'t": 213, "'v": 214, '(': 154, ')': 155, ',': 244, '-': 227, '.': 232, '/': 243, '0': 246, '1': 247, '2': 248, '3': 249, '4': 250, '5': 251, '6': 252, '7': 253, '8': 254, '9': 255, ':': 156, ';': 157, '?': 230, '@': 80, 'A': 128, 'B': 129, 'C': 130, 'D': 131, 'E': 132, 'F': 133, 'G': 134, 'H': 135, 'I': 136, 'J': 137, 'K': 138, 'L': 139, 'M': 140, 'N': 141, 'O': 142, 'P': 143, 'Q': 144, 'R': 145, 'S': 146, 'T': 147, 'U': 148, 'V': 149, 'W': 150, 'X': 151, 'Y': 152, 'Z': 153, '[': 158, ']': 159, 'a': 160, 'b': 161, 'c': 162, 'd': 163, 'e': 164, 'f': 165, 'g': 166, 'h': 167, 'i': 168, 'j': 169, 'k': 170, 'l': 171, 'm': 172, 'n': 173, 'o': 174, 'p': 175, 'q': 176, 'r': 177, 's': 178, 't': 179, 'u': 180, 'v': 181, 'w': 182, 'x': 183, 'y': 184, 'z': 185, '¥': 240, '×': 241, '…': 117, '№': 116, '→': 235, '─': 122, '│': 124, '┌': 121, '┐': 123, '└': 125, '┘': 126, '▶': 237, '▷': 236, '▼': 238, '♀': 245, '♂': 239, '<': 0xe1, '>': 0xe2,}
         
     STARTER_OFFESTS = [[symbols['OaksLabScript8'] + 0x4, symbols['OaksLabText2'] + 0xc, symbols['OaksLabText4'] + 0x2, symbols['ReadTrainer'] + 0xa5, symbols['StarterMons_50faf'] + 0x4, symbols['StarterMons_510d9'] + 0x4],
@@ -191,9 +193,9 @@ class PokemonRed(Game):
         
         rom.seek(symbols['TechnicalMachines'])
         for i in range(50):
-            TMS.append(rom.readbyte(1))
+            TMS.append(rom.readbyte())
         for i in range(5):
-            HMS.append(rom.readbyte(1))
+            HMS.append(rom.readbyte())
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
     
@@ -659,9 +661,7 @@ class PokemonRed(Game):
     opt_update_types.layer = -5
         
     def opt_update_moves(self):
-        # This is quite nasty.
-        self.rom.seek(self.symbols["LoadHLMoves"] + 1)
-        self.rom.writeshort((self.symbols["Gen6Moves"] % 0x4000) + 0x4000)
+        self.rom_flags['update_moves'] = True
         
     def opt_trainer_classes(self):
         classes = range(len(self.TRAINER_CLASSES))
@@ -738,8 +738,7 @@ class PokemonRed(Game):
             self.rom.writebyte(int(triangular(-4, 4, 0)))
     
     def opt_instant_text(self):
-        self.rom.seek(0x00ff)
-        self.rom.writebyte(0x01) # bit 0 but i have no other stuff yet
+        self.rom_flags['instant_text'] = True
                 
     def finalize(self):
         self.rom.seek(self.symbols['TitleMons'])
@@ -754,14 +753,15 @@ class PokemonRed(Game):
         
         
         if self.debug:
-            self.rom.seek(0x00ff)
-            self.rom.writebyte(0xff)
-        else:
-            self.rom.seek(0x00ff)
-            byte = self.rom.readbyte()
-            byte &= 0b11111101
-            self.rom.seek(0x00ff)
-            self.rom.writebyte(byte)
+            self.rom_flags['debug'] = True
+        
+        assert len(self.ROM_FLAGS) <= 8
+        byte = 0x00
+        for i, flag in enumerate(self.ROM_FLAGS):
+            if self.rom_flags[flag]:
+                byte |= 1 << i
+        self.rom.seek(0x00ff)
+        self.rom.writebyte(byte)
             
         
         self.rom.seek(self.symbols['TitleScreenText'])
