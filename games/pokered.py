@@ -144,6 +144,7 @@ class PokemonRed(Game):
     FIELD_ITEMS = []
     EXISTING_CRIES = []
     TMS = []
+    HMS = []
     
     with ROM('roms/'+filename, 'rb') as rom:
         for objectmap in OBJECT_MAPS:
@@ -190,7 +191,9 @@ class PokemonRed(Game):
         
         rom.seek(symbols['TechnicalMachines'])
         for i in range(50):
-            TMS.append(ord(rom.read(1)))
+            TMS.append(rom.readbyte(1))
+        for i in range(5):
+            HMS.append(rom.readbyte(1))
     
     PALS = {"PAL_MEWMON": 0x10,    "PAL_BLUEMON": 0x11,    "PAL_REDMON": 0x12,    "PAL_CYANMON": 0x13,    "PAL_PURPLEMON": 0x14,    "PAL_BROWNMON": 0x15,    "PAL_GREENMON": 0x16,    "PAL_PINKMON": 0x17,    "PAL_YELLOWMON": 0x18,    "PAL_GREYMON": 0x19}
     
@@ -515,7 +518,7 @@ class PokemonRed(Game):
                 for x in range(7): # TMHM
                     rom.writebyte(randint(0, 255))
             else:
-                tm_compatibility = [(move if move <= self.MAXMOVE else self.NEW_MOVES[:move]) in data['moveset'] for move in self.TMS]
+                tm_compatibility = [(move if move <= self.MAXMOVE else self.NEW_MOVES[:move]) in data['moveset'] for move in self.TMS+self.HMS]
                 for j in range(7):
                     byte = 0
                     for k in range(8):
