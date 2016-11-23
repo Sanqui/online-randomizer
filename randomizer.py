@@ -129,7 +129,7 @@ class Game():
             filename = filename.replace('/', '_').replace('\0', '').replace('?', '_').replace('#', '_')
             filename = "static/roms/"+filename
             while os.path.isfile(filename+'.gbc'):
-                filename += '_'
+                filename += '_3'
             if not filename.endswith('.gbc'):
                 filename += '.gbc'
         else:

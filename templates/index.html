@@ -210,6 +210,8 @@ $(document).ready(function(){
     </script>
 </head>
 <body>
+<!--	<h1>the Online Randomizer will be back soon :(</h1>
+</body>-->
     {% if debug %}
         <div class="ui label top left attached red unstable" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;"><u>DEBUG VERSION</u><br>NOT THE REAL THING!</div>
     {% endif %}
@@ -217,6 +219,7 @@ $(document).ready(function(){
         <div class="ui label top right attached red big unstable" data-content="New features are added often. The game may crash! Save your game often.">UNSTABLE</div>
         <!-- https://i.imgur.com/Z0k2D3y.png -->
         <h1 class="logo"><img src="static/logos/{{'{:02}'.format(randlogo)}}.png" alt="Online Randomizer"></h1>
+	<p><font color=red>If you're interested in developing the randomizer further</font>, please read <a href="http://forums.pokemonspeedruns.com/viewtopic.php?f=85&t=649">this thread</a>.
         <h2 class="ui header">Pick a game:</h2>
         <div id="games" class="ui buttons">
             {% for game in games %}
@@ -261,6 +264,13 @@ $(document).ready(function(){
                 <div id="generating" style="display:none;"></div>
             </div>
         </div>
+	<h2>Known bugs</h2>
+<font color=darkred>Please do not do the following things (or at least save before trying) until I get around fixing them:</font>
+<ul><li>Pick up Hitmonchan or Hitmonlee from the Dojo
+<li>Use the Daycare
+<li>Battle Mewtwo
+</ul><br>
+<b>A full rewrite of the randomizer is in progress!</b>
     </div>
     <div class="ui divider"></div>
     <div class="about">
@@ -271,7 +281,7 @@ $(document).ready(function(){
         <p style="text-align:center;"><img src="static/screenshots/red00.png" style="width:160px; height:144px; margin: auto;">
         <p>Feel free to try it out!  That being said, the randomizer is still a work in progress, and sometimes I add shiny new features without testing them thoroughly first.  If you intend to do a long-term playthrough, like a Let's Play, <strong>maybe hold off a little bit</strong> until the randomizer becomes more stable.  Wouldn't want your game to crash near the end of the game!
         <p>Eventually, I intend on supporting a variety of different games.  I also have a lot of ideas coming for Pokémon Red, like random maps.  By the way, if you want to randomize Pokémon games other than Red, check out Dabomstew's <a href="http://pokehacks.dabomstew.com/randomizer/">Universal Randomizer</a>.
-        <p>Got an idea of your own?  Or want to report a nasty bug?  Feel free to throw any feedback at me: <a href="mailto:gsanky@gmail.com">gsanky@gmail.com</a> - Thanks!
+        <p><!--Got an idea of your own?  Or want to report a nasty bug?  Feel free to throw any feedback at me: <a href="mailto:gsanky@gmail.com">gsanky@gmail.com</a> - Thanks!-->
     </div>
     <footer class="ui two column  aligned relaxed grid basic segment">
         <div class="column">
@@ -287,6 +297,7 @@ $(document).ready(function(){
                 <li><a href="http://involuntary-twitch.deviantart.com/">Involuntary-Twitch</a>
                 <li><a href="http://racieb.deviantart.com/">RacieB</a>
                 <li><a href="http://mylittlekeldeo.deviantart.com/">mylittlekeldeo</a>
+                <li><a href="https://www.furaffinity.net/user/kamikitty/">QueenKami</a>
                 <li>Reimu
                 <li><a href="http://sanqui.rustedlogic.net/">Sanqui</a>
                 <li>Lunaria
@@ -310,7 +321,7 @@ $(document).ready(function(){
                 <li><a href="https://github.com/veekun/pokedex/">veekun pokedex</a> contributors, including eevee, Zhorken, magical, En-Cu-Kou and others.
             </ul>
             <p>Huge thanks to everybody for their contributions!
-            <p><small>Not credited?  Please do let me know!</small>
+            <p><small>Not credited?  <a href="mailto:gsanky@gmail.com">Please do let me know!</a></small>
         </div>
         <!--<div class="ui vertical divider"></div>-->
         <div class="column">
@@ -355,7 +366,4 @@ $(document).ready(function(){
 <!-- End Piwik Code -->
 </body>
 </html>
-
-
-
 
