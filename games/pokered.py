@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 from randomizer import *
 
+from copy import deepcopy
+
 minidex = yaml.load(open('data/minidex.yaml'))
 type_names = "- normal fighting flying poison ground rock bug ghost steel fire water grass electric psychic ice dragon dark fairy".split()
 type_efficacy = []
@@ -210,11 +212,20 @@ class PokemonRed(Game):
                 raise KeyError("Music_{} not in symfile. There could be a typo, or the symbol wasn't exported.".format(s))
     SONG_SOURCES = yaml.load(open("data/song_sources.yaml"))
     
+    def init(self):
+        self.fair_moves = self.FAIR_MOVES.copy()
+        self.attacking_moves = self.ATTACKING_MOVES.copy()
+        self.dex = deepcopy(self.DEX)
+        self.dex_families = deepcopy(self.DEX_FAMILIES)
+        self.types = self.TYPES.copy()
+        self.pokemon = deepcopy(self.POKEMON)
+        self.tms = deepcopy(self.TMS)
+    
     def random_pokemon(self):
-        return choice(self.POKEMON)
+        return choice(self.pokemon)
     
     def get_move(self, move):
-        if move <= self.MAXMOVE and move in self.FAIR_MOVES:
+        if move <= self.MAXMOVE and move in self.fair_moves:
             return move
         elif self.choices['new_moves'] and move in self.NEW_MOVES.keys():
             return self.NEW_MOVES[move]
@@ -225,42 +236,40 @@ class PokemonRed(Game):
     def opt_move_rules(self, rule):
         if not self.choices['movesets']: return
         if rule in ('no-hms', 'no-hms-broken'):
-            self.FAIR_MOVES -= {57, 70, 19, 15, 148}
-            self.ATTACKING_MOVES -= {57, 70, 19, 15, 148}
+            self.fair_moves -= {57, 70, 19, 15, 148}
+            self.attacking_moves -= {57, 70, 19, 15, 148}
         if rule in ('no-broken', 'no-hms-broken'):
             # SONICBOOM, Dragon Rage, Spore, GUILLOTINE HORN_DRILL FISSURE
-            self.FAIR_MOVES -= {0x30, 0x52, 0x93, 0x0c, 0x1e, 0x5a}
-            self.ATTACKING_MOVES -= {0x30, 0x52, 0x93, 0x0c, 0x1e, 0x5a}
+            self.fair_moves -= {0x30, 0x52, 0x93, 0x0c, 0x1e, 0x5a}
+            self.attacking_moves -= {0x30, 0x52, 0x93, 0x0c, 0x1e, 0x5a}
         return
     opt_move_rules.layer = -5
     
     def opt_new_moves(self):
         self.opt_update_moves()
-        self.FAIR_MOVES = self.FAIR_MOVES.copy()
-        self.FAIR_MOVES.update(set(self.NEW_MOVES.values()))
-        self.ATTACKING_MOVES = self.ATTACKING_MOVES.copy()
-        self.ATTACKING_MOVES.update(self.NEW_ATTACKING_MOVES)
+        self.fair_moves.update(set(self.NEW_MOVES.values()))
+        self.attacking_moves.update(self.NEW_ATTACKING_MOVES)
     opt_new_moves.layer = -6
     
     #:Keep,randomize:Random,basics:Random basics,three-basic:Random three stage basics,single:Single random (yellow style)
     def opt_starter_pokemon(self, mode):
         #starters = [self.random_pokemon() for i in range(3)]
         if mode == 'randomize':
-            starters = [1+self.DEX.index(mon) for mon in sample(self.DEX, 3)]
+            starters = [1+self.dex.index(mon) for mon in sample(self.dex, 3)]
         elif mode == 'basics':
-            families = sample(self.DEX_FAMILIES, 3)
-            starters = [1+self.DEX.index(family[0]) for family in families]
+            families = sample(self.dex_families, 3)
+            starters = [1+self.dex.index(family[0]) for family in families]
         elif mode == 'three-basic':
             three_stage_families = []
-            for family in self.DEX_FAMILIES:
+            for family in self.dex_families:
                 if len(family) == 3: three_stage_families.append(family)
             if len(three_stage_families) >= 3:
                 families = sample(three_stage_families, 3)
             else:
                 families = [choice(three_stage_families) for i in range(3)]
-            starters = [1+self.DEX.index(family[0]) for family in families]
+            starters = [1+self.dex.index(family[0]) for family in families]
         elif mode == 'single':
-            starters = [1+self.DEX.index(choice(self.DEX))]*3
+            starters = [1+self.dex.index(choice(self.dex))]*3
         
         for i, starter in enumerate(starters):
             for offset in self.STARTER_OFFESTS[i]:
@@ -353,8 +362,8 @@ class PokemonRed(Game):
     def opt_tms(self):
         rom = self.rom
         rom.seek(self.symbols["TechnicalMachines"])
-        self.TMS = sample(self.FAIR_MOVES, 50)
-        for move in self.TMS:
+        self.tms = sample(self.fair_moves, 50)
+        for move in self.tms:
             rom.writebyte(move)
     opt_tms.layer = -2
         
@@ -411,13 +420,13 @@ class PokemonRed(Game):
             if len(dex) == dex_size: break
             break
         
-        self.POKEMON = range(1, len(dex)+1)
+        self.pokemon = range(1, len(dex)+1)
         
         types = self.TYPES
         rom = self.rom
         
-        self.DEX_FAMILIES = dex_families
-        self.DEX = dex
+        self.dex_families = dex_families
+        self.dex = dex
         #print 'Picked {} mons for dex'.format(len(dex))
         
         # sprites
@@ -493,11 +502,11 @@ class PokemonRed(Game):
                     num_moves = sum([level == 1 for level, move in data['learnset']])
                 for movei in range(min(num_moves, 4)):
                     if movei == 0 and self.choices['force_attacking']:
-                        move = choice(self.ATTACKING_MOVES)
+                        move = choice(self.attacking_moves)
                     else:
-                        move = choice(self.FAIR_MOVES)
+                        move = choice(self.fair_moves)
                     while move in moves:
-                        move = choice(self.FAIR_MOVES)
+                        move = choice(self.fair_moves)
                     moves[movei] = move
             else:
                 moves = []
@@ -520,7 +529,7 @@ class PokemonRed(Game):
                 for x in range(7): # TMHM
                     rom.writebyte(randint(0, 255))
             else:
-                tm_compatibility = [(move if move <= self.MAXMOVE else self.NEW_MOVES.inv[move]) in data['moveset'] for move in self.TMS+self.HMS]
+                tm_compatibility = [(move if move <= self.MAXMOVE else self.NEW_MOVES.inv[move]) in data['moveset'] for move in self.tms+self.tms]
                 for j in range(7):
                     byte = 0 if j != 6 else 0xff
                     for k in range(8):
@@ -560,7 +569,7 @@ class PokemonRed(Game):
                 if self.choices['movesets']:
                     if level != 1 and (movei <= 2 or movei % 2 == 0):
                         rom.writebyte(level)
-                        rom.writebyte(choice(self.FAIR_MOVES))
+                        rom.writebyte(choice(self.fair_moves))
                 else:
                     if level != 1 and self.get_move(move):
                         rom.writebyte(level)
@@ -592,7 +601,7 @@ class PokemonRed(Game):
         # cries
         
         self.rom.seek(self.symbols["CryHeaders"])
-        for i, mon in enumerate(self.DEX):
+        for i, mon in enumerate(self.dex):
             if mon <= 251:
                 self.rom.write(self.EXISTING_CRIES[mon-1])
             else:
@@ -613,11 +622,11 @@ class PokemonRed(Game):
                 move = rom.readbyte()
                 if move != 0:
                     if i == 0 and self.choices['force_attacking']:
-                        move = choice(self.ATTACKING_MOVES)
+                        move = choice(self.attacking_moves)
                     else:
-                        move = choice(self.FAIR_MOVES)
+                        move = choice(self.fair_moves)
                     while move in moves:
-                        move = choice(self.FAIR_MOVES)
+                        move = choice(self.fair_moves)
                 moves.append(move)
             assert len(moves) == 4
             rom.seek(rom.tell() - 4)
@@ -636,15 +645,14 @@ class PokemonRed(Game):
             # learnset
             while True:
                 if rom.readbyte() == 0: break
-                move = choice(self.FAIR_MOVES)
+                move = choice(self.fair_moves)
                 while move in moves:
-                    move = choice(self.FAIR_MOVES)
+                    move = choice(self.fair_moves)
                 moves.append(move)
                 rom.writebyte(move)
     
     def opt_update_types(self):
-        self.TYPES = self.TYPES.copy()
-        self.TYPES.update({'dark': 0x1b, 'steel': 0x09, 'fairy': 0x1c})
+        self.types.update({'dark': 0x1b, 'steel': 0x09, 'fairy': 0x1c})
         # TODO this needs to be per-instance!  we're updating the class
         # TYPES dictionary now which is wrong
         
@@ -654,8 +662,8 @@ class PokemonRed(Game):
         self.rom.seek(self.symbols["TypeEffects"])
         for type0, type1, factor in type_efficacy:
             if factor != 100:
-                self.rom.writebyte(self.TYPES[type0])
-                self.rom.writebyte(self.TYPES[type1])
+                self.rom.writebyte(self.types[type0])
+                self.rom.writebyte(self.types[type1])
                 self.rom.writebyte({0:0x00, 50: 0x05, 200: 0x20}[factor])
         self.rom.writebyte(0xff)
     opt_update_types.layer = -5
@@ -686,8 +694,8 @@ class PokemonRed(Game):
         rom = self.rom
         for address in self.GIFT_POKEMON_ADDRESSES:
             self.rom.seek(address)
-            self.rom.writebyte(choice(self.POKEMON))
-        prizemons = sample(self.POKEMON, 6)
+            self.rom.writebyte(choice(self.pokemon))
+        prizemons = sample(self.pokemon, 6)
         for j in range(2):
             rom.seek(self.symbols['PrizeMenuMon{}Entries'.format(j+1)])
             for i in range(3):
@@ -742,7 +750,7 @@ class PokemonRed(Game):
                 
     def finalize(self):
         self.rom.seek(self.symbols['TitleMons'])
-        for mon in sample(self.POKEMON, 16):
+        for mon in sample(self.pokemon, 16):
             self.rom.writebyte(mon)
         
         intromon = self.random_pokemon()

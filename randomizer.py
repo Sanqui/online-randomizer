@@ -106,6 +106,9 @@ class Game():
         self.rom_flags = {}
         for flag in self.ROM_FLAGS:
             self.rom_flags[flag] = False
+        
+        if hasattr(self, "init"):
+            self.init()
     
     def opt_dummy(self):
         return True
