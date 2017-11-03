@@ -1,0 +1,16 @@
+bidict==0.13.1
+cffi==1.11.2
+click==6.7
+Flask==0.12.2
+gitdb2==2.0.3
+GitPython==2.1.7
+itsdangerous==0.24
+Jinja2==2.9.6
+MarkupSafe==1.0
+pycparser==2.18
+pypng==0.0.18
+PyYAML==3.12
+six==1.11.0
+smmap2==2.0.3
+Werkzeug==0.12.2
+WTForms==2.1
