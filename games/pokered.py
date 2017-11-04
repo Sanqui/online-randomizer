@@ -775,14 +775,14 @@ class PokemonRed(Game):
         self.rom.seek(self.symbols['TitleScreenText'])
         if not self.debug:
             text = """                    
-Randomizer options  
-are returning soon! 
+Have fun playing the
+randomizer!         
                     
 This ROM comes from:
 http://tinyurl.com  
          /pkmnrandom
                     
-(commit:)           """
+(commit:            """
         else:
             text = """                    
 This is a DEBUG ROM.
@@ -792,7 +792,7 @@ Get your ROM at:
 http://tinyurl.com  
          /pkmnrandom
                     
-(commit:)           """
+(commit:            """
         text = text.replace('\n', '')
         for commit in repo.iter_commits('master'):
             if not commit.message.startswith("Merge "):
