@@ -507,8 +507,10 @@ class PokemonRed(Game):
                         move = choice(self.fair_moves)
                     while move in moves:
                         move = choice(self.fair_moves)
+                    assert move != 255
                     moves[movei] = move
             else:
+                # does this even work properly?
                 moves = []
                 for level, move in data['learnset']:
                     if level == 1 and self.get_move(move):
