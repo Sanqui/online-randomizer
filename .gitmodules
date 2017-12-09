@@ -1,3 +1,6 @@
 [submodule "sources/pokered"]
 	path = sources/pokered
 	url = git@github.com:Sanqui/pokered-randomizer.git
+[submodule "data/pokedex"]
+	path = data/pokedex
+	url = https://github.com/veekun/pokedex

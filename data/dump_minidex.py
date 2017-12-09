@@ -1,13 +1,18 @@
 from pokedex.db import connect, tables, util
+from tqdm import tqdm
 session = connect()
 
 import yaml
 
-x_y = session.query(tables.VersionGroup).filter(tables.VersionGroup.identifier=="x-y").one()
+VERSION = "ultra-sun-ultra-moon"
+
+version = session.query(tables.VersionGroup).filter(tables.VersionGroup.identifier==VERSION).one()
 
 mons = {}
 
-for pokemon_species in session.query(tables.PokemonSpecies).order_by(tables.PokemonSpecies.id):
+pokemon_query = session.query(tables.PokemonSpecies).order_by(tables.PokemonSpecies.id)
+
+for pokemon_species in tqdm(pokemon_query, total=pokemon_query.count()):
     data = {}
     pokemon = pokemon_species.default_pokemon
     data['id'] = pokemon_species.id
@@ -27,7 +32,7 @@ for pokemon_species in session.query(tables.PokemonSpecies).order_by(tables.Poke
     data['height'] = pokemon.height
     data['weight'] = pokemon.weight
     data['learnset'] = []
-    for pokemon_move in session.query(tables.PokemonMove).filter(tables.PokemonMove.pokemon==pokemon, tables.PokemonMove.version_group==x_y, tables.PokemonMove.level > 0):
+    for pokemon_move in session.query(tables.PokemonMove).filter(tables.PokemonMove.pokemon==pokemon, tables.PokemonMove.version_group==version, tables.PokemonMove.level > 0):
         data['learnset'].append([pokemon_move.level, pokemon_move.move_id])
     data['learnset'].sort()
     moveset = set()
@@ -41,7 +46,7 @@ for pokemon_species in session.query(tables.PokemonSpecies).order_by(tables.Poke
     data['type1'] = pokemon.types[1].identifier if len(pokemon.types) > 1 else None
     
     mons[data['id']] = data
-    print data['id'], data['name']
+    #print data['id'], data['name']
     
 print 'Got pokemon'
 
