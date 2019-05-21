@@ -28,7 +28,7 @@ def split(list_, interval):
     """
     Split a list by length.
     """
-    for i in xrange(0, len(list_), interval):
+    for i in range(0, len(list_), interval):
         j = min(i + interval, len(list_))
         yield list_[i:j]
 
@@ -80,7 +80,7 @@ def transpose(tiles, width=None):
     """
     if width == None:
         width = int(sqrt(len(tiles))) # assume square image
-    tiles = sorted(enumerate(tiles), key= lambda (i, tile): i % width)
+    tiles = sorted(enumerate(tiles), key= lambda i_tile: i_tile[0] % width)
     return [tile for i, tile in tiles]
 
 def transpose_tiles(image, width=None):
@@ -139,7 +139,7 @@ def condense_tiles_to_map(image):
 def to_file(filename, data):
     file = open(filename, 'wb')
     for byte in data:
-        file.write('%c' % byte)
+        file.write(bytes([byte]))
     file.close()
 
 
@@ -212,7 +212,7 @@ class Compressed:
             # Tally up the number of bytes that can be compressed
             # by a single command from the current address.
             self.scores = {}
-            for method in self.commands.keys():
+            for method in list(self.commands.keys()):
                 self.scores[method] = 0
 
             # The most common byte by far is 0 (whitespace in
@@ -246,7 +246,7 @@ class Compressed:
             address = self.address
             min_length = 4 # minimum worthwhile length
             max_length = 9 # any further and the time loss is too significant
-            for length in xrange(min_length, min(len(self.data) - address, max_length)):
+            for length in range(min_length, min(len(self.data) - address, max_length)):
                 keyword = self.data[address:address+length]
                 for offset, byte in enumerate(self.data[:address]):
                     # offset ranges are -0x80:-1 and 0:0x7fff
@@ -274,14 +274,14 @@ class Compressed:
                 last_matches = list(self.matches)
 
             # If the scores are too low, try again from the next byte.
-            if not any(map(lambda x: {
+            if not any([{
                 'blank':     1,
                 'iterate':   2,
                 'alternate': 3,
                 'repeat':    3,
                 'reverse':   3,
                 'flip':      3,
-            }.get(x[0], 10000) < x[1], self.scores.items())):
+            }.get(x[0], 10000) < x[1] for x in list(self.scores.items())]):
                 self.literal += [self.data[self.address]]
                 self.address += 1
 
@@ -297,7 +297,7 @@ class Compressed:
         self.output += [lz_end]
 
     def bit_flip(self, data):
-        return [sum(((byte >> i) & 1) << (7 - i) for i in xrange(8)) for byte in data]
+        return [sum(((byte >> i) & 1) << (7 - i) for i in range(8)) for byte in data]
 
     def do_literal(self):
         if self.literal:
@@ -337,14 +337,14 @@ class Compressed:
                             offset -= 1 # this is a hack, but it seems to work
                         output += [offset]
                     else:
-                        output += [offset / 0x100, offset % 0x100]
+                        output += [offset // 0x100, offset % 0x100]
 
         if self.debug:
-            print (
-                  dict(map(reversed, self.commands.items()))[cmd],
+            print((
+                  dict(list(map(reversed, list(self.commands.items()))))[cmd],
                   length, '\t',
                   ' '.join(map('{:02x}'.format, output))
-            )
+            ))
 
         self.output += output
         return length
@@ -352,7 +352,7 @@ class Compressed:
     def do_scored(self):
         # Which command did the best?
         winner, score = sorted(
-            self.scores.items(),
+            list(self.scores.items()),
             key=lambda x:(-x[1], [
                 'blank',
                 'repeat',
@@ -401,7 +401,7 @@ class Decompressed:
         self.compressed_data = self.lz[self.start : self.start + self.address]
 
         # print tuple containing start and end address
-        if debug: print '(' + hex(self.start) + ', ' + hex(self.start + self.address+1) + '),'
+        if debug: print('(' + hex(self.start) + ', ' + hex(self.start + self.address+1) + '),')
 
 
     def command_list(self):
@@ -425,7 +425,7 @@ class Decompressed:
             else:
                 length = byte & 0b11111
             length += 1
-            name = dict(map(reversed, lz_commands.items()))[cmd]
+            name = dict(list(map(reversed, list(lz_commands.items()))))[cmd]
             if name == 'iterate':
                 address += 1
             elif name == 'alternate':
@@ -437,7 +437,7 @@ class Decompressed:
                     address += 1
             elif name == 'literal':
                 address += length
-            print name, length, '\t', ' '.join(map('{:02x}'.format, list(data)[cmd_addr:address]))
+            print(name, length, '\t', ' '.join(map('{:02x}'.format, list(data)[cmd_addr:address])))
 
 
     def decompress(self):
@@ -459,7 +459,7 @@ class Decompressed:
             if self.cmd == lz_commands['long']: # 10-bit param
                 self.cmd = (self.byte & 0b00011100) >> 2
                 self.length = (self.byte & 0b00000011) << 8
-                self.next()
+                next(self)
                 self.length += self.byte + 1
             else: # 5-bit param
                 self.length = (self.byte & 0b00011111) + 1
@@ -475,13 +475,13 @@ class Decompressed:
                 self.doZeros()
 
             else: # repeaters
-                self.next()
+                next(self)
                 if self.byte > 0x7f: # negative
                     self.displacement = self.byte & 0x7f
                     self.displacement = len(self.output) - self.displacement - 1
                 else: # positive
                     self.displacement = self.byte * 0x100
-                    self.next()
+                    next(self)
                     self.displacement += self.byte
 
                 if self.cmd == lz_commands['flip']:
@@ -498,7 +498,7 @@ class Decompressed:
     def getCurByte(self):
         self.byte = self.lz[self.start+self.address]
 
-    def next(self):
+    def __next__(self):
         self.address += 1
         self.getCurByte()
 
@@ -507,14 +507,14 @@ class Decompressed:
         Copy data directly.
         """
         for byte in range(self.length):
-            self.next()
+            next(self)
             self.output.append(self.byte)
 
     def doIter(self):
         """
         Write one byte repeatedly.
         """
-        self.next()
+        next(self)
         for byte in range(self.length):
             self.output.append(self.byte)
 
@@ -523,9 +523,9 @@ class Decompressed:
         Write alternating bytes.
         """
         self.alts = []
-        self.next()
+        next(self)
         self.alts.append(self.byte)
-        self.next()
+        next(self)
         self.alts.append(self.byte)
 
         for byte in range(self.length):
@@ -593,7 +593,7 @@ def make_sizes(num_monsters=251):
 
     address = base_stats + 0x11 # pic size
     sizes   = rom[address : address + 0x20 * num_monsters : 0x20]
-    sizes   = map(lambda x: str(x & 0xf), sizes)
+    sizes   = [str(x & 0xf) for x in sizes]
     return '\n'.join(' ' * 8 + ', '.join(split(sizes, 16)))
 
 
@@ -610,7 +610,7 @@ def decompress_fx_by_id(i, fxs=0xcfcf6):
     return fx
 
 def rip_compressed_fx(dest='gfx/fx', num_fx=40, fxs=0xcfcf6):
-    for i in xrange(num_fx):
+    for i in range(num_fx):
         name = '%.3d' % i
         fx = decompress_fx_by_id(i, fxs)
         filename = os.path.join(dest, name + '.2bpp.lz')
@@ -724,7 +724,7 @@ def decompress_trainer_by_id(rom, i, crystal=True):
     return trainer
 
 def rip_compressed_trainer_pics(rom):
-    for t in xrange(num_trainers):
+    for t in range(num_trainers):
         trainer_name = trainer_names[t].lower().replace('_','')
         trainer  = decompress_trainer_by_id(t)
         filename = os.path.join('gfx/trainers/', trainer_name + '.6x6.2bpp.lz')
@@ -793,7 +793,7 @@ def rip_compressed_tilesets(rom, dest='gfx/tilesets'):
     len_tileset     = 15
     num_tilesets    = 0x25
 
-    for tileset in xrange(num_tilesets):
+    for tileset in range(num_tilesets):
         addr = tileset * len_tileset + tileset_headers
 
         bank     = rom[addr]
@@ -983,7 +983,7 @@ def dump_trainer_pals():
         to_file('../'+dir+filename, pal_data)
 
         spacing = ' ' * (12 - len(name))
-        print name+'Palette:'+spacing+' INCBIN"'+dir+filename+'"'
+        print(name+'Palette:'+spacing+' INCBIN"'+dir+filename+'"')
 
 
 
@@ -996,7 +996,7 @@ def flatten(planar):
         bottom = bottom
         top = top
         strip = []
-        for i in xrange(7,-1,-1):
+        for i in range(7,-1,-1):
             color = (
                 (bottom >> i & 1) +
                 (top *2 >> i & 2)
@@ -1012,14 +1012,14 @@ def to_lines(image, width):
     """
     tile_width = 8
     tile_height = 8
-    num_columns = width / tile_width
-    height = len(image) / width
+    num_columns = width // tile_width
+    height = len(image) // width
 
     lines = []
-    for cur_line in xrange(height):
-        tile_row = cur_line / tile_height
+    for cur_line in range(height):
+        tile_row = cur_line // tile_height
         line = []
-        for column in xrange(num_columns):
+        for column in range(num_columns):
             anchor = (
                 num_columns * tile_row * tile_width * tile_height +
                 column * tile_width * tile_height +
@@ -1040,7 +1040,7 @@ def dmg2rgb(word):
             value >>= 5
     word = shift(word)
     # distribution is less even w/ << 3
-    red, green, blue = [int(color * 8.25) for color in [word.next() for _ in xrange(3)]]
+    red, green, blue = [int(color * 8.25) for color in [next(word) for _ in range(3)]]
     alpha = 255
     return (red, green, blue, alpha)
 
@@ -1049,9 +1049,9 @@ def rgb_to_dmg(color):
     """
     For PNGs.
     """
-    word =  (color['r'] / 8)
-    word += (color['g'] / 8) << 5
-    word += (color['b'] / 8) << 10
+    word =  (color['r'] // 8)
+    word += (color['g'] // 8) << 5
+    word += (color['b'] // 8) << 10
     return word
 
 
@@ -1082,7 +1082,7 @@ def png_to_rgb(palette):
     """
     output = ''
     for color in palette:
-        r, g, b = [color[c] / 8 for c in 'rgb']
+        r, g, b = [color[c] // 8 for c in 'rgb']
         output += '\tRGB ' + ', '.join(['%.2d' % hue for hue in (r, g, b)])
         output += '\n'
     return output
@@ -1170,7 +1170,7 @@ def convert_2bpp_to_png(image, **kwargs):
 
     # Width must be specified to interleave.
     if interleave and width:
-        image = interleave_tiles(image, width / 8)
+        image = interleave_tiles(image, width // 8)
 
     # Pad the image by a given number of tiles if asked.
     image += pad_color * 0x10 * tile_padding
@@ -1185,34 +1185,34 @@ def convert_2bpp_to_png(image, **kwargs):
         trailing = len(image) % pic_length
 
         pic = []
-        for i in xrange(0, len(image) - trailing, pic_length):
+        for i in range(0, len(image) - trailing, pic_length):
             pic += transpose_tiles(image[i:i+pic_length], h)
         image = bytearray(pic) + image[len(image) - trailing:]
 
         # Pad out trailing lines.
-        image += pad_color * 0x10 * ((w - (len(image) / 0x10) % h) % w)
+        image += pad_color * 0x10 * ((w - (len(image) // 0x10) % h) % w)
 
     def px_length(img):
         return len(img) * 4
     def tile_length(img):
-        return len(img) * 4 / (8*8)
+        return len(img) * 4 // (8*8)
 
     if width and height:
-        tile_width = width / 8
+        tile_width = width // 8
         more_tile_padding = (tile_width - (tile_length(image) % tile_width or tile_width))
         image += pad_color * 0x10 * more_tile_padding
 
     elif width and not height:
-        tile_width = width / 8
+        tile_width = width // 8
         more_tile_padding = (tile_width - (tile_length(image) % tile_width or tile_width))
         image += pad_color * 0x10 * more_tile_padding
-        height = px_length(image) / width
+        height = px_length(image) // width
 
     elif height and not width:
-        tile_height = height / 8
+        tile_height = height // 8
         more_tile_padding = (tile_height - (tile_length(image) % tile_height or tile_height))
         image += pad_color * 0x10 * more_tile_padding
-        width = px_length(image) / height
+        width = px_length(image) // height
 
     # at least one dimension should be given
     if width * height != px_length(image):
@@ -1220,15 +1220,15 @@ def convert_2bpp_to_png(image, **kwargs):
         matches = []
         # Height need not be divisible by 8, but width must.
         # See pokered gfx/minimize_pic.1bpp.
-        for w in range(8, px_length(image) / 2 + 1, 8):
-            h = px_length(image) / w
+        for w in range(8, px_length(image) // 2 + 1, 8):
+            h = px_length(image) // w
             if w * h == px_length(image):
                 matches += [(w, h)]
         # go for the most square image
         if len(matches):
-            width, height = sorted(matches, key= lambda (w, h): (h % 8 != 0, w + h))[0] # favor height
+            width, height = sorted(matches, key= lambda w_h: (w_h[1] % 8 != 0, w_h[0] + w_h[1]))[0] # favor height
         else:
-            raise Exception, 'Image can\'t be divided into tiles (%d px)!' % (px_length(image))
+            raise Exception('Image can\'t be divided into tiles (%d px)!' % (px_length(image)))
 
     # convert tiles to lines
     lines = to_lines(flatten(image), width)
@@ -1281,12 +1281,12 @@ def get_image_padding(width, height, wstep=8, hstep=8):
     }
 
     if width % wstep and width >= wstep:
-       pad = float(width % wstep) / 2
+       pad = float(width % wstep) // 2
        padding['left']   = int(ceil(pad))
        padding['right']  = int(floor(pad))
 
     if height % hstep and height >= hstep:
-       pad = float(height % hstep) / 2
+       pad = float(height % hstep) // 2
        padding['top']    = int(ceil(pad))
        padding['bottom'] = int(floor(pad))
 
@@ -1315,7 +1315,7 @@ def png_to_2bpp(filein, **kwargs):
     palette = []
     for line in rgba:
         newline = []
-        for px in xrange(0, len(line), len_px):
+        for px in range(0, len(line), len_px):
             color = { 'r': line[px  ],
                       'g': line[px+1],
                       'b': line[px+2],
@@ -1334,7 +1334,7 @@ def png_to_2bpp(filein, **kwargs):
         'grey':  { 'r': 0x55, 'g': 0x55, 'b': 0x55, 'a': 0xff },
         'gray':  { 'r': 0xaa, 'g': 0xaa, 'b': 0xaa, 'a': 0xff },
     }
-    for hue in hues.values():
+    for hue in list(hues.values()):
         if len(palette) >= 4:
             break
         if hue not in palette:
@@ -1345,7 +1345,7 @@ def png_to_2bpp(filein, **kwargs):
         rough = { 'r':  4.7,
                   'g':  1.4,
                   'b': 13.8, }
-        return sum(color[key] * rough[key] for key in rough.keys())
+        return sum(color[key] * rough[key] for key in list(rough.keys()))
     palette.sort(key=luminance)
 
     # Game Boy palette order
@@ -1369,15 +1369,15 @@ def png_to_2bpp(filein, **kwargs):
     # Graphics are stored in tiles instead of lines
     tile_width  = 8
     tile_height = 8
-    num_columns = max(width, tile_width) / tile_width
-    num_rows = max(height, tile_height) / tile_height
+    num_columns = max(width, tile_width) // tile_width
+    num_rows = max(height, tile_height) // tile_height
     image = []
 
-    for row in xrange(num_rows):
-        for column in xrange(num_columns):
+    for row in range(num_rows):
+        for column in range(num_columns):
 
             # Split it up into strips to convert to planar data
-            for strip in xrange(min(tile_height, height)):
+            for strip in range(min(tile_height, height)):
                 anchor = (
                     row * num_columns * tile_width * tile_height +
                     column * tile_width +
@@ -1387,7 +1387,7 @@ def png_to_2bpp(filein, **kwargs):
                 bottom, top = 0, 0
                 for bit, quad in enumerate(line):
                     bottom += (quad & 1) << (7 - bit)
-                    top += (quad /2 & 1) << (7 - bit)
+                    top += (quad //2 & 1) << (7 - bit)
                 image += [bottom, top]
 
     if pic_dimensions:
@@ -1395,13 +1395,13 @@ def png_to_2bpp(filein, **kwargs):
 
         tiles = get_tiles(image)
         pic_length = w * h
-        tile_width = width / 8
+        tile_width = width // 8
         trailing = len(tiles) % pic_length
         new_image = []
-        for block in xrange(len(tiles) / pic_length):
-            offset = (h * tile_width) * ((block * w) / tile_width) + ((block * w) % tile_width)
+        for block in range(len(tiles) // pic_length):
+            offset = (h * tile_width) * ((block * w) // tile_width) + ((block * w) % tile_width)
             pic = []
-            for row in xrange(h):
+            for row in range(h):
                 index = offset + (row * tile_width)
                 pic += tiles[index:index + w]
             new_image += transpose(pic, w)
@@ -1517,7 +1517,7 @@ def png_to_1bpp(filename, **kwargs):
 def mass_to_png(directory='gfx'):
     # greyscale
     for root, dirs, files in os.walk('./gfx/'):
-        convert_to_png(map(lambda x: os.path.join(root, x), files))
+        convert_to_png([os.path.join(root, x) for x in files])
 
 def mass_to_colored_png(directory='gfx'):
     # greyscale, unless a palette is detected
@@ -1592,7 +1592,7 @@ def convert_to_2bpp(filenames=[]):
         elif extension == '.png':
             export_png_to_2bpp(filename)
         else:
-            raise Exception, "Don't know how to convert {} to 2bpp!".format(filename)
+            raise Exception("Don't know how to convert {} to 2bpp!".format(filename))
 
 def convert_to_1bpp(filenames=[]):
     for filename in filenames:
@@ -1604,7 +1604,7 @@ def convert_to_1bpp(filenames=[]):
         elif extension == '.png':
             export_png_to_1bpp(filename)
         else:
-            raise Exception, "Don't know how to convert {} to 1bpp!".format(filename)
+            raise Exception("Don't know how to convert {} to 1bpp!".format(filename))
 
 def convert_to_png(filenames=[]):
     for filename in filenames:
@@ -1616,7 +1616,7 @@ def convert_to_png(filenames=[]):
         elif extension == '.png':
             pass
         else:
-            raise Exception, "Don't know how to convert {} to png!".format(filename)
+            raise Exception("Don't know how to convert {} to png!".format(filename))
 
 def compress(filenames=[]):
     for filename in filenames:
@@ -1660,7 +1660,7 @@ def main():
     }.get(args.mode, None)
 
     if method == None:
-        raise Exception, "Unknown conversion method!"
+        raise Exception("Unknown conversion method!")
 
     method(args.filenames)
 

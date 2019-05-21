@@ -38,6 +38,6 @@ mogrify -dither None -colors 4 backsprites_/*
 
 cp -n backsprites/* backsprites_/
 
-python2 gfx.py 2bpp sprites/* backsprites/* backsprites_/*
-python2 pic.py compress sprites/*.2bpp backsprites/*.2bpp backsprites_/*.2bpp
-python2 rbypals.py
+python gfx.py 2bpp sprites/* backsprites/* backsprites_/*
+python pic.py compress sprites/*.2bpp backsprites/*.2bpp backsprites_/*.2bpp
+python rbypals.py

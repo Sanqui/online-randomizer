@@ -20,6 +20,8 @@ subprocess.check_call("make -C sources/pokered/ red".split(' '))
 subprocess.check_call("cp sources/pokered/pokered.gbc roms/pokered.gbc".split(' '))
 subprocess.check_call("cp sources/pokered/pokered.sym roms/pokered.sym".split(' '))
 
+symbols = symfile("roms/pokered.sym")
+
 @randomizer_games.append
 class PokemonRed(Game):
     name = "Pokémon Red"
@@ -140,8 +142,8 @@ class PokemonRed(Game):
     NEW_ATTACKING_MOVES = set(range(204, 249)) - {214, 244}
     
     DEX_FAMILIES = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [13, 14, 15], [16, 17, 18], [19, 20], [21, 22], [23, 24], [25, 26], [27, 28], [29, 30, 31], [32, 33, 34], [35, 36], [37, 38], [39, 40], [41, 42], [43, 44, 45], [46, 47], [48, 49], [50, 51], [52, 53], [54, 55], [56, 57], [58, 59], [60, 61, 62], [63, 64, 65], [66, 67, 68], [69, 70, 71], [72, 73], [74, 75, 76], [77, 78], [79, 80], [81, 82], [83], [84, 85], [86, 87], [88, 89], [90, 91], [92, 93, 94], [95], [96, 97], [98, 99], [100, 101], [102, 103], [104, 105], [106, 107], [108], [109, 110], [111, 112], [113], [114], [115], [116, 117], [118, 119], [120, 121], [122], [123], [124], [125], [126], [127], [128], [129, 130], [131], [132], [133, 134, 135, 136], [137], [138, 139], [140, 141], [142], [143], [144], [145], [146], [147, 148, 149], [150], [151]]
-    DEX = range(1, 152)
-    POKEMON = range(1, 152)
+    DEX = list(range(1, 152))
+    POKEMON = list(range(1, 152))
     
     OBJECT_MAPS = "CeladonCity PalletTown ViridianCity PewterCity CeruleanCity VermilionCity FuchsiaCity BluesHouse VermilionHouse3 IndigoPlateauLobby SilphCo4 SilphCo5 SilphCo6 CinnabarIsland Route1 OaksLab ViridianMart School ViridianHouse PewterHouse1 PewterHouse2 CeruleanHouseTrashed CeruleanHouse1 BikeShop LavenderHouse1 LavenderHouse2 NameRater VermilionHouse1 VermilionDock CeladonMansion5 FuchsiaMart SaffronHouse1 SaffronHouse2 DiglettsCaveRoute2 Route2House Route5Gate Route6Gate Route7Gate Route8Gate UndergroundPathEntranceRoute8 PowerPlant DiglettsCaveEntranceRoute11 Route16House Route22Gate BillsHouse LavenderTown ViridianPokecenter Mansion1 RockTunnel1 SeafoamIslands1 SSAnne3 VictoryRoad3 RocketHideout1 RocketHideout2 RocketHideout3 RocketHideout4 RocketHideoutElevator SilphCoElevator SafariZoneEast SafariZoneNorth SafariZoneCenter SafariZoneRestHouse1 SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 UnknownDungeon2 UnknownDungeon3 RockTunnel2 SeafoamIslands2 SeafoamIslands3 SeafoamIslands4 SeafoamIslands5 Route7 RedsHouse1F CeladonMart3 CeladonMart4 CeladonMartRoof CeladonMartElevator CeladonMansion1 CeladonMansion2 CeladonMansion3 CeladonMansion4 CeladonPokecenter CeladonGym CeladonGameCorner CeladonMart5 CeladonPrizeRoom CeladonDiner CeladonHouse CeladonHotel MtMoonPokecenter RockTunnelPokecenter Route11Gate Route11GateUpstairs Route12Gate Route12GateUpstairs Route15Gate Route15GateUpstairs Route16Gate Route16GateUpstairs Route18Gate Route18GateUpstairs MtMoon1 MtMoon3 SafariZoneWest SafariZoneSecretHouse BattleCenterM TradeCenterM Route22 Route20 Route23 Route24 Route25 IndigoPlateau SaffronCity VictoryRoad2 MtMoon2 SilphCo7 Mansion2 Mansion3 Mansion4 Route2 Route3 Route4 Route5 Route9 Route13 Route14 Route17 Route19 Route21 VermilionHouse2 CeladonMart2 FuchsiaHouse3 DayCareM Route12House SilphCo8 Route6 Route8 Route10 Route11 Route12 Route15 Route16 Route18 FanClub SilphCo2 SilphCo3 SilphCo10 Lance HallofFameRoom RedsHouse2F Museum1F Museum2F PewterGym PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter LavenderMart VermilionPokecenter VermilionMart VermilionGym CopycatsHouse2F FightingDojo SaffronGym SaffronMart SilphCo1 SaffronPokecenter ViridianForestExit Route2Gate ViridianForestEntrance UndergroundPathEntranceRoute5 UndergroundPathEntranceRoute6 UndergroundPathEntranceRoute7 UndergroundPathEntranceRoute7Copy SilphCo9 VictoryRoad1 PokemonTower1 PokemonTower2 PokemonTower3 PokemonTower4 PokemonTower5 PokemonTower6 PokemonTower7 CeladonMart1 ViridianForest SSAnne1 SSAnne2 SSAnne4 SSAnne5 SSAnne6 SSAnne7 SSAnne8 SSAnne9 SSAnne10 UndergroundPathNS UndergroundPathWE DiglettsCave SilphCo11 ViridianGym PewterMart UnknownDungeon1 CeruleanHouse2 FuchsiaHouse1 FuchsiaPokecenter FuchsiaHouse2 SafariZoneEntrance FuchsiaGym FuchsiaMeetingRoom CinnabarGym Lab1 Lab2 Lab3 Lab4 CinnabarPokecenter CinnabarMart CopycatsHouse1F Gary Lorelei Bruno Agatha".split()
     HIDDEN_OBJECT_MAPS = "RedsHouse2F BluesHouse OaksLab ViridianPokecenter ViridianMart ViridianSchool ViridianGym Museum1F PewterGym PewterMart PewterPokecenter CeruleanPokecenter CeruleanGym CeruleanMart LavenderPokecenter VermilionPokecenter VermilionGym CeladonMansion2 CeladonPokecenter CeladonGym GameCorner CeladonHotel FuchsiaPokecenter FuchsiaGym CinnabarGym CinnabarPokecenter SaffronGym MtMoonPokecenter RockTunnelPokecenter BattleCenter TradeCenter ViridianForest MtMoon3 IndigoPlateau Route25 Route9 SSAnne6 SSAnne10 RocketHideout1 RocketHideout3 RocketHideout4 SaffronPokecenter PokemonTower5 Route13 SafariZoneEntrance SafariZoneWest SilphCo5F SilphCo9F CopycatsHouse2F UnknownDungeon1 UnknownDungeon3 PowerPlant SeafoamIslands3 SeafoamIslands5 Mansion1 Mansion3 Route23 VictoryRoad2 Unused6F BillsHouse ViridianCity SafariZoneRestHouse2 SafariZoneRestHouse3 SafariZoneRestHouse4 Route15GateUpstairs LavenderHouse1 CeladonMansion5 FightingDojo Route10 IndigoPlateauLobby CinnabarLab4 BikeShop Route11 Route12 Mansion2 Mansion4 SilphCo11F Route17 UndergroundPathNs UndergroundPathWe CeladonCity SeafoamIslands4 VermilionCity CeruleanCity Route4".split()
@@ -372,7 +374,7 @@ class PokemonRed(Game):
     #    rom.seek(0x17ab9) # sprite sets
     #    for i in range(0xa):
     #        for i in range(8):
-    #            rom.write(chr(randint(1, 0x3b)))
+    #            rom.write(randint(1, 0x3b))
     #        rom.read(2)
     
     def opt_game_pokemon(self):
@@ -382,9 +384,9 @@ class PokemonRed(Game):
         generation_ranges = (range(  1, 152), range(152, 252), range(252, 387),
                              range(387, 494), range(494, 650), range(650, 723))
         if self.choices['game_pokemon_source_generations']:
-            allowed_pokemon = sum((r for gen, r in enumerate(generation_ranges, 1) if gen in self.choices['game_pokemon_source_generations']), [])
+            allowed_pokemon = sum((list(r) for gen, r in enumerate(generation_ranges, 1) if gen in self.choices['game_pokemon_source_generations']), [])
         else:
-            allowed_pokemon = range(1, 723)
+            allowed_pokemon = list(range(1, 723))
         
         families_ = []
         # this could be rewritten as a generator but meh
@@ -399,7 +401,7 @@ class PokemonRed(Game):
         
         dex_size = min(251 if self.choices['pokedex_size']=="251" else 151, len(allowed_pokemon))
         if original_151:
-            dex = self.DEX
+            dex = list(self.DEX)
             dex_families = self.DEX_FAMILIES
             for family in families:
                 for mon in dex:
@@ -420,7 +422,7 @@ class PokemonRed(Game):
             if len(dex) == dex_size: break
             break
         
-        self.pokemon = range(1, len(dex)+1)
+        self.pokemon = list(range(1, len(dex)+1))
         
         types = self.TYPES
         rom = self.rom
@@ -440,9 +442,9 @@ class PokemonRed(Game):
             addresses = []
             addresses.append((banki, len(bank)))
             sprites = b""
-            sprites += open('sprites/{:03}.pic'.format(num)).read()
+            sprites += open('sprites/{:03}.pic'.format(num), 'rb').read()
             addresses.append((banki, len(bank)+len(sprites)))
-            sprites += open('backsprites_/{:03}.pic'.format(num)).read()
+            sprites += open('backsprites_/{:03}.pic'.format(num), 'rb').read()
             if len(bank + sprites) < 0x4000:
                 bank += sprites
                 pokemon_sprite_addresses.append(addresses)
@@ -455,9 +457,9 @@ class PokemonRed(Game):
                 addresses = []
                 addresses.append((banki, len(bank)))
                 sprites = b""
-                sprites += open('sprites/{:03}.pic'.format(num)).read()
+                sprites += open('sprites/{:03}.pic'.format(num), 'rb').read()
                 addresses.append((banki, len(bank)+len(sprites)))
-                sprites += open('backsprites_/{:03}.pic'.format(num)).read()
+                sprites += open('backsprites_/{:03}.pic'.format(num), 'rb').read()
                 
                 bank += sprites
                 pokemon_sprite_addresses.append(addresses)
@@ -555,11 +557,11 @@ class PokemonRed(Game):
                     trigger = 'level-up'
                     evolution['minimum_level'] = 42
                 
-                rom.write(chr(self.EVOLUTION_METHODS[trigger]))
+                rom.write(self.EVOLUTION_METHODS[trigger])
                 if trigger == 'level-up':
-                    rom.write(chr(evolution['minimum_level'] if evolution['minimum_level'] else 30))
+                    rom.write(evolution['minimum_level'] if evolution['minimum_level'] else 30)
                 elif trigger == 'use-item':
-                    rom.write(chr(self.EVO_ITEMS.get(evolution['trigger_item'], self.EVO_ITEMS['moon-stone'])))
+                    rom.write(self.EVO_ITEMS.get(evolution['trigger_item'], self.EVO_ITEMS['moon-stone']))
                     rom.writebyte(1)
                 elif trigger == 'trade':
                     rom.writebyte(1)
@@ -591,7 +593,7 @@ class PokemonRed(Game):
         
         # menu icons
         self.rom.seek(self.symbols["MonPartyData"]) # what a bad name
-        for i in range((len(dex)+1)/2):
+        for i in range((len(dex)+1)//2):
             self.rom.writebyte( ((menu_icons[dex[i*2]]   if i*2  <len(dex) else 0) << 4) |
                                  (menu_icons[dex[i*2+1]] if i*2+1<len(dex) else 0))
         
@@ -674,7 +676,7 @@ class PokemonRed(Game):
         self.rom_flags['update_moves'] = True
         
     def opt_trainer_classes(self):
-        classes = range(len(self.TRAINER_CLASSES))
+        classes = list(range(len(self.TRAINER_CLASSES)))
         shuffle(classes)
         # TODO maybe TrainerClassMoveChoiceModifications ?
         
@@ -715,7 +717,7 @@ class PokemonRed(Game):
             self.rom.seek(0x3f * 0x4000)
             for sprite in sprites:
                 locs[sprite] = self.rom.tell()
-                self.rom.write(open('gfx/ow_sprites/{}.2bpp'.format(sprite)).read())
+                self.rom.write(open('gfx/ow_sprites/{}.2bpp'.format(sprite), 'rb').read())
         assert self.rom.tell() <= 0x40 * 0x4000
         
         self.rom.seek(self.symbols['SpriteSheetPointerTable'])
@@ -738,7 +740,7 @@ class PokemonRed(Game):
                 if not songs_: songs_ = [songs[0]]
                 songs = songs_
             song = "Music_"+choice(songs)
-            self.rom.writebyte(self.symbols[song] / 0x4000)
+            self.rom.writebyte(self.symbols[song] // 0x4000)
             self.rom.writeshort((self.symbols[song] % 0x4000) + 0x4000)
     
     def opt_pitches(self):

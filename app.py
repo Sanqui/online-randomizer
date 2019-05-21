@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+
 import time
 from datetime import datetime
 import random
@@ -13,7 +13,7 @@ app.config['APPLICATION_ROOT'] = '/randomizer'
 @app.template_filter('datetime')
 def datetime_format(value, format='%Y-%m-%d  %H:%M'):
     if not value: return "-"
-    if isinstance(value, unicode): return value
+    if isinstance(value, str): return value
     if isinstance(value, int): value = datetime.fromtimestamp(value)
     return value.strftime(format)
 
@@ -84,7 +84,7 @@ def index():
     return render_template("index.html", games=randomizer.randomizer_games, games_json=games_json, debug=debug, randlogo=random.randint(1, 28), commits=commits)
 
 if __name__ == "__main__":
-    print "Running..."
+    print("Running...")
     debug = True
     app.run(host="", port=8580, debug=True, threaded=True, use_evalex=False)
 

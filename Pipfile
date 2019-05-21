@@ -1,0 +1,27 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+bidict = "==0.13.1"
+cffi = "==1.11.2"
+click = "==6.7"
+gitdb2 = "==2.0.3"
+itsdangerous = "==0.24"
+pycparser = "==2.18"
+pypng = "==0.0.18"
+six = "==1.11.0"
+smmap2 = "==2.0.3"
+Flask = "==0.12.2"
+GitPython = "==2.1.7"
+Jinja2 = "==2.9.6"
+MarkupSafe = "==1.0"
+PyYAML = "==3.12"
+Werkzeug = "==0.12.2"
+WTForms = "==2.1"
+
+[requires]
+python_version = "3.7"

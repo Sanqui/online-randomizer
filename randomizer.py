@@ -1,7 +1,5 @@
-#!/bin/python2
+#!/bin/python3
 # encoding: utf-8
-
-from __future__ import unicode_literals
 
 from collections import OrderedDict
 from bidict import bidict
@@ -55,9 +53,37 @@ def symfile(filename):
             symbols[label] = addr
     return symbols
 
-class ROM(file):
+# Python 3 doesn't let us subclass `file`.
+class ROM():
+    def __init__(self, filename, mode=None):
+        self.file = open(filename, mode)
+    
+    def read(self, num):
+        return self.file.read(num)
+    
+    def write(self, data):
+        if isinstance(data, int):
+            data = bytes([data])
+        return self.file.write(data)
+    
+    def seek(self, pos):
+        return self.file.seek(pos)
+    
+    def tell(self, ):
+        return self.file.tell()
+        
+    def __enter__ (self):
+        return self
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.file.close()
+    
+    def close(self):
+        self.file.close()
+    
     def readbyte(self):
         return ord(self.read(1))
+        
     def readshort(self):
         return struct.unpack(b'<H', self.read(2))[0]
     
@@ -66,6 +92,7 @@ class ROM(file):
             self.write(struct.pack(b'<b', byte))
         else:
             self.write(struct.pack(b'<B', byte))
+    
     def writeshort(self, short):
         self.write(struct.pack(b'<H', short))
 
@@ -117,9 +144,9 @@ class Game():
         # TODO no length
         for i in range(length if length else len(string)+1):
             if i < len(string):
-                self.rom.write(chr(self.CHARS.get(string[i], 230))) # 230 = ?
+                self.rom.write(self.CHARS.get(string[i], 230)) # 230 = ?
             else:
-                self.rom.write(chr(self.CHARS['@']))
+                self.rom.write(self.CHARS['@'])
     
     def finalize(self):
         pass
