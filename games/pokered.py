@@ -6,7 +6,7 @@ from randomizer import *
 
 from copy import deepcopy
 
-minidex = yaml.load(open('data/minidex.yaml'))
+minidex = yaml.safe_load(open('data/minidex.yaml'))
 type_names = "- normal fighting flying poison ground rock bug ghost steel fire water grass electric psychic ice dragon dark fairy".split()
 type_efficacy = []
 for row in open('data/type_efficacy.csv').readlines():
@@ -212,7 +212,7 @@ class PokemonRed(Game):
         for s in song:
             if "Music_"+s not in symbols:
                 raise KeyError("Music_{} not in symfile. There could be a typo, or the symbol wasn't exported.".format(s))
-    SONG_SOURCES = yaml.load(open("data/song_sources.yaml"))
+    SONG_SOURCES = yaml.safe_load(open("data/song_sources.yaml"))
     
     def init(self):
         self.fair_moves = self.FAIR_MOVES.copy()
