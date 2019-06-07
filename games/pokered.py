@@ -401,8 +401,8 @@ class PokemonRed(Game):
         
         dex_size = min(251 if self.choices['pokedex_size']=="251" else 151, len(allowed_pokemon))
         if original_151:
-            dex = list(self.DEX)
-            dex_families = self.DEX_FAMILIES
+            dex = list(self.dex)
+            dex_families = self.dex_families
             for family in families:
                 for mon in dex:
                     if mon in family:
@@ -424,7 +424,7 @@ class PokemonRed(Game):
         
         self.pokemon = list(range(1, len(dex)+1))
         
-        types = self.TYPES
+        types = self.types
         rom = self.rom
         
         self.dex_families = dex_families
