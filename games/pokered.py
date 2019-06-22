@@ -69,39 +69,52 @@ class PokemonRed(Game):
         instant_text = BooleanField("Instant text speed", description="This makes all dialogue display instantly, instead of delaying after each letter.")
     
     presets = {
-        'race': {
-            'starter_pokemon': 'randomize', 'ow_pokemon': True, 'pokedex_size': "251",
-            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
-            'force_attacking': True, 'force_four_moves': True, 'change_trade_evos': True,
-            'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
-            'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
-            'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True, 'update_moves': True,
-            'new_moves': True,
-            'yellow_gym_leaders': True,
-            'soundtrack': True, 'pitches': False, 'soundtrack_sources-4': False,
-        },
-        'casual': {
-            'starter_pokemon': 'three-basic', 'ow_pokemon': True, 'pokedex_size': "251", 
-            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
-            'force_attacking': True, 'force_four_moves': False, 'change_trade_evos': True,
-            'special_conversion': 'average', 'move_rules': '', 'cries': True,
-            'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
-            'tms': True, 'field_items': 'shuffle', 'update_types': True, 'update_moves': True,
-            'new_moves': True,
-            'yellow_gym_leaders': True,
-            'soundtrack': True, 'pitches': False, 'soundtrack_sources-4': False,
-        },
-        'classic': {
-            'starter_pokemon': 'randomize', 'ow_pokemon': True, 
-            'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
-            'force_attacking': True, 'force_four_moves': False,
-            'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
-            'trainer_classes': False,
-            'yellow_gym_leaders': False,
-            'tms': True, 'field_items': '', 'update_types': False, 'update_moves': False,
-            'new_moves': False,
-            'music': False, 'pitches': False
-        }
+        
+        '721': Preset(
+            '721', '721 Pokémon',
+            description='Play a game of Pokémon Red where all 721 Pokémon can show up in the dex!',
+            values = {
+                'starter_pokemon': 'three-basic', 'ow_pokemon': True, 'pokedex_size': "251", 
+                'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
+                'force_attacking': True, 'force_four_moves': False, 'change_trade_evos': True,
+                'special_conversion': 'average', 'move_rules': '', 'cries': True,
+                'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
+                'tms': True, 'field_items': 'shuffle', 'update_types': True, 'update_moves': True,
+                'new_moves': True,
+                'yellow_gym_leaders': True,
+                'soundtrack': True, 'pitches': False, 'soundtrack_sources-4': False,
+            }
+        ),
+        'classic': Preset(
+            'classic', 'Classic',
+            description='Play classic Pokémon Red with the original 151 Pokémon, but randomized as a twist.',
+            values = {
+                'starter_pokemon': 'randomize', 'ow_pokemon': True, 
+                'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': False, 'movesets': True,
+                'force_attacking': True, 'force_four_moves': False,
+                'special_conversion': 'average', 'move_rules': 'no-hms', 'cries': False,
+                'trainer_classes': False,
+                'yellow_gym_leaders': False,
+                'tms': True, 'field_items': '', 'update_types': False, 'update_moves': False,
+                'new_moves': False,
+                'music': False, 'pitches': False
+            }
+        ),
+        'race': Preset(
+            'race', 'Race',
+            description='Do you enjoy racing to beat the game with friends?  This setting will try to make things a bit more fair.',
+            values = {
+                'starter_pokemon': 'randomize', 'ow_pokemon': True, 'pokedex_size': "251",
+                'trainer_pokemon': True, 'wild_pokemon': True, 'game_pokemon': True, 'movesets': True,
+                'force_attacking': True, 'force_four_moves': True, 'change_trade_evos': True,
+                'special_conversion': 'average', 'move_rules': 'no-hms-broken', 'cries': True,
+                'trainer_classes': True, 'ow_sprites': True, 'backsprites': 'back',
+                'tms': True, 'field_items': 'shuffle-no-tm', 'update_types': True, 'update_moves': True,
+                'new_moves': True,
+                'yellow_gym_leaders': True,
+                'soundtrack': True, 'pitches': False, 'soundtrack_sources-4': False,
+            }
+        ),
     }
     
     ROM_FLAGS = "instant_text debug update_moves".split()

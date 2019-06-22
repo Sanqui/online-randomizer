@@ -5,7 +5,11 @@
   {%- else -%}
       <tr data-expandedby="{{game.form_expanded_by[field.name]}}" class="{{'expanded' if game.form_expanded_by[field.name] else ''}}">
           <td class="not-i td-label">{%- if field.name != "submit" -%}{{- field.label -}}{%- endif -%}</td>
-          <td><i class="{{'help' if field.description else ''}} icon help-popup" data-content="{{field.description}}"></i></td>
+          <td>
+            {% if field.description %}
+              <span class="help help-popup" data-content="{{field.description}}">🛈</span>
+            {% endif %}
+          </td>
           <td class="not-i td-input">{{ field(**kwargs)|safe }}
           {% if field.errors %}
             <ul class=errors>
@@ -34,6 +38,7 @@ dt {/*font-weight:bold;*/ float:left; width:50%; clear:left;}
 dt::after {content:'';}
 
 .logo {text-align: center;}
+h1 .randomized-games-logo {max-width: 100%;}
 
 code {font-size:12px;}
 
@@ -63,6 +68,18 @@ p {text-indent:4%;}
 
 .unstable {font-weight:bold !important; font-size:16px !important; cursor: default;}
 
+.help-popup {cursor: default;  color: green;}
+
+.big-presets .button-big-preset {color: #333; text-transform: none; font-weight: normal; 
+    text-align: left; width: 100%;
+    margin-bottom: 4px;}
+
+.button-presets {margin-bottom: 8px !important;}
+
+h4 {margin-bottom: 6px;}
+
+button:disabled {cursor: default;}
+
     </style>
     
     <!--<script src="http://code.jquery.com/jquery-1.11.1.js"></script>-->
@@ -75,22 +92,40 @@ var curgame
 var generating = false
 var options_showed = false
 
+function showgamelogo(gameid) {
+    for (gameid_ in games) {
+        if (gameid_ == gameid) {
+            $("#game-logo-" + gameid_).show()
+        } else {
+            $("#game-logo-" + gameid_).hide()
+        }
+    }
+}
+
 function render_options(gameid, instant) {
     console.log(gameid)
+    $("#btn-pickanother").show()
+    $("#games").hide()
+    $('#btn-generate').hide();
+    showgamelogo(gameid)
     curgame = gameid
     for (gameid_ in games) {
-        $("#options-"+gameid_).hide()
+        if (gameid_ != gameid ) {
+            $("#options-"+gameid_).hide()
+        }
     }
     //$("#options").show()
     //$("#options_controls").show()
     //$("#controls").show()
+    $('#main-controls').show();
+    $('#big-presets-'+gameid).show();
     if (instant) {
         $("#randomizer_options").show()
         $("#options-"+gameid).show()
         options_showed = true
     } else {
         if (!options_showed) {
-            $("#randomizer_options").fadeIn(1000)
+            $("#randomizer_options").fadeIn(500)
             $("#options-"+gameid).show()
             options_showed = true
         }
@@ -99,6 +134,14 @@ function render_options(gameid, instant) {
         }
     }
     window.location.hash = curgame
+}
+
+function pickanother() {
+    $("#btn-pickanother").hide()
+    $("#games").show()
+    showgamelogo("")
+    $("#randomizer_options").hide()
+    options_showed = false;
 }
 
 function set_preset(presetid) {
@@ -129,7 +172,7 @@ function generate() {
         generating = true
         //$("#btn-generate").click(function(){})
         $("#generating").show()
-        //$("#generating").html('Hold on!')
+        $("#generating").html('Generating...')
         $.post('generate', $("#form-"+curgame+", #filename").serialize(), generated, 'json').fail(oops)
     }
 }
@@ -141,8 +184,10 @@ function generated(data) {
         $("#btn-generate").show()
         if (data.error == "cooldown") {
             $("#generating").html("Please wait " + Math.round(data.cooldown) + " more seconds before requesting a ROM.")
+            $("#main-controls").show()
         } else if (data.error == "filename") {
             $("#generating").html("Filename too long, keep it to 64 characters please.")
+            $("#main-controls").show()
         }
     } else {
         $("#btn-generate").removeClass('loading')
@@ -176,13 +221,62 @@ function update_all_expanded(instant) {
     })
 }
 
-$(document).ready(function(){
-    for (gameid in games) {
-        $('#btn-'+gameid).click(function() {render_options(this.getAttribute('data-game'), false) })
-        for (presetid in games[gameid].presets) {
-            $('#btn-preset-'+presetid).click(function() {set_preset(this.getAttribute('data-preset')) })
+clicked_big_preset = false
+
+function makepresetbuttons() {
+    for (gid in games) {
+        $('#btn-'+gid).click(function() {render_options(this.getAttribute('data-game'), false) })
+        for (presetid in games[gid].presets) {
+            $('#btn-big-preset-'+gid+'-'+presetid).click(function() {
+                if (clicked_big_preset) {
+                    for (presetid in games[btn_gameid].presets) {
+                        $('#btn-big-preset-'+btn_gameid+'-'+presetid).show();
+                        $('#btn-big-preset-'+btn_gameid+'-custom').show();
+                    }
+                    $('#main-controls').show();
+                    clicked_big_preset = false
+                } else {
+                    btn_presetid = this.getAttribute('data-preset');
+                    btn_gameid = this.getAttribute('data-gameid');
+                    set_preset(btn_presetid);
+                    $('#btn-generate').click();
+                    for (presetid in games[btn_gameid].presets) {
+                        if (presetid != btn_presetid) {
+                            $('#btn-big-preset-'+btn_gameid+'-'+presetid).hide();
+                        }
+                    }
+                    $('#btn-big-preset-'+btn_gameid+'-custom').hide();
+                    $('#main-controls').hide();
+                    clicked_big_preset = true
+                }
+                
+            })
+            $('#btn-preset-'+presetid).click(function() {
+                set_preset(this.getAttribute('data-preset'));
+                return false;
+            })
         }
+        $('#btn-big-preset-'+gid+"-custom").click(function(){
+            btn_gameid = this.getAttribute('data-gameid');
+            $('#big-presets-'+btn_gameid).hide()
+            $('#form-'+btn_gameid).fadeIn(500)
+            $('#btn-generate').show();
+        });
+        $('#btn-presets-'+gid).click(function(){
+            btn_gameid = this.getAttribute('data-gameid');
+            $('#big-presets-'+btn_gameid).fadeIn(500)
+            $('#form-'+btn_gameid).hide()            
+            $('#btn-generate').hide();
+            return false;
+        });
     }
+}
+
+$(document).ready(function(){
+    $('#btn-pickanother').click(pickanother)
+    
+    makepresetbuttons()
+    
     $('#btn-select-all').click(function() { $('#options input').prop('checked', true); update_all_expanded()})
     $('#btn-select-none').click(function() { $('#options input').prop('checked', false); update_all_expanded()})
     $('#btn-generate').click(generate)
@@ -216,28 +310,57 @@ $(document).ready(function(){
     {% if debug %}
         <div class="ui label top left attached red unstable" style="font-size: 20px; font-weight:bold; position:fixed; z-index:50;"><u>DEBUG VERSION</u><br>NOT THE REAL THING!</div>
     {% endif %}
+    
+    <h1><a href="/"><img src="static/randomized_games_logo.png" class="randomized-games-logo"></a></h1>
+    
     <div class="main">
         <div class="ui label top right attached red big unstable" data-content="New features are added often. The game may crash! Save your game often.">UNSTABLE</div>
         <!-- https://i.imgur.com/Z0k2D3y.png -->
-        <h1 class="logo"><img src="static/logos/{{'{:02}'.format(randlogo)}}.png" alt="Online Randomizer"></h1>
-        <h2 class="ui header">Pick a game:</h2>
-        <div id="games" class="ui buttons">
+        <!--<h1 class="logo"><img src="static/logos/{{'{:02}'.format(randlogo)}}.png" alt="Online Randomizer"></h1>-->
+        <button class="ui button" data-game="pokered" id="btn-pickanother" style="display: none;">Pick a different game</button>
+        <div id="games" style="text-align: center;">
+            <h2 class="ui header">Pick a game</h2>
+            <div class="ui buttons center">
+                <button class="ui button" data-game="pokered" id="btn-pokered"><img src="static/games/pokered.png" alt="Pokémon Red" width="320" height="156"></button>
+            </div>
+            <div class="ui buttons center">
+                {% for game in games[1:] %}
+                    <button class="ui button" data-game="{{game.identifier}}" id="btn-{{game.identifier}}"><img src="static/games/{{game.identifier}}.png" alt="{{game.name}}" width="160" height="78"></button>
+                {% endfor %}
+            </div>
+        </div>
+        <div style="text-align: center;">
             {% for game in games %}
-                <button class="ui button" data-game="{{game.identifier}}" id="btn-{{game.identifier}}">{{game.name}}</button>
+                <img id="game-logo-{{game.identifier}}" src="static/games/{{game.identifier}}.png" width="320" height="156" style="display: none;">
             {% endfor %}
         </div>
         <div id="randomizer_options" style="display:none;">
             <div id="options_controls" class="ui top attached header">
-                <h3 class="ui header">Pick some options:</h3>
+                <h3 class="ui header">How would you like to play?</h3>
             </div>
             <div id="options" class="ui segment attached">
-                <div class="ui mini buttons">
-                    <button id="btn-select-all"  class="ui button">Select all</button>
-                    <button id='btn-select-none' class="ui button">Select none</button>
-                </div>
+                <!--
+                    <div class="ui mini buttons">
+                        <button id="btn-select-all"  class="ui button">Select all</button>
+                        <button id='btn-select-none' class="ui button">Select none</button>
+                    </div>
+                -->
                 {% for game in games %}
                     <div id="options-{{game.identifier}}" style="display:none;">
-                        {% if game.presets %}
+                        <div class="big-presets" id="big-presets-{{game.identifier}}">
+                                {% for identifier, preset in game.presets.items() %}
+                                    <button id="btn-big-preset-{{game.identifier}}-{{preset.identifier}}" data-preset="{{preset.identifier}}" data-gameid="{{game.identifier}}" class="ui button button-big-preset">
+                                        <h4>{{preset.name}}</h4>
+                                        {{preset.description}}
+                                    </button>
+                                {% endfor %}
+                                <button id="btn-big-preset-{{game.identifier}}-custom" data-preset="custom" data-gameid="{{game.identifier}}" class="ui button button-big-preset">
+                                    <h4>Custom</h4>
+                                    Choose exactly how you'd like to play!
+                                </button>
+                        </div>
+                        <form id="form-{{game.identifier}}" class="" style="display: none;">
+                            <button id="btn-presets-{{game.identifier}}" data-gameid="{{game.identifier}}" class="ui button small button-presets">Choose a preset instead</button>
                             <div class="ui label top right attached">
                                 Presets:
                                 <div class="ui mini buttons">
@@ -246,8 +369,6 @@ $(document).ready(function(){
                                     {% endfor %}
                                 </div>
                             </div>
-                        {% endif %}
-                        <form id="form-{{game.identifier}}" class="">
                             <input type="hidden" name="game" value="{{game.identifier}}">
                             <table>
                             {% for field in game.Form() %}
@@ -259,9 +380,11 @@ $(document).ready(function(){
                 {% endfor %}
             </div>
             <div id="controls" class="ui bottom attached header">
-                <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename" maxlength="64">.gbc
-                <button id="btn-generate" class="ui button">Generate</button>
-                <div id="generating" style="display:none;"></div>
+                <div id="main-controls">
+                    <input type="text" id="filename" name="filename" class="ui input" placeholder="Custom filename" maxlength="64">.gbc
+                    <button id="btn-generate" class="ui button">Generate</button>
+                </div>
+                <div id="generating" style="display:none;">Generating...</div>
             </div>
         </div>
 </ul>

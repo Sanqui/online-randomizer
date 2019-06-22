@@ -198,6 +198,13 @@ class Game():
         
         return filename
 
+class Preset():
+    def __init__(self, identifier, name, description, image=None, values=None):
+        self.identifier = identifier
+        self.name = name
+        self.description = description
+        self.image = image
+        self.values = values
 
 randomizer_games = []
 import games.pokered

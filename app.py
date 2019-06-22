@@ -31,7 +31,9 @@ for game in randomizer.randomizer_games:
     game_json = {}
     game_json['name'] = game.name
     game_json['options'] = {} #game.options
-    game_json['presets'] = game.presets #game.options
+    game_json['presets'] = {}
+    for preset_identifier, preset in game.presets.items():
+        game_json['presets'][preset_identifier] = preset.values
     games_json[game.identifier] = game_json
 
 games_json = json.dumps(games_json)
