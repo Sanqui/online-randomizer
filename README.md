@@ -1,6 +1,17 @@
 randomizer
 ===
-Central repository for Sanqui's Online randomizer, to-be randomized.games.
+Central repository for Sanqui's Online Pokémon randomizer, planned to become randomized.games, now frozen in time.
+
+Development
+---
+Dependencies are managed with [uv](https://docs.astral.sh/uv/) and require Python 3.12+.
+
+```sh
+git submodule update --init sources/pokered  # needs rgbds to build
+./convert_sprites.sh                         # generates sprites/ and data/monpals.txt (needs imagemagick)
+uv sync
+uv run app.py                                # serves on http://localhost:8580
+```
 
 License
 ---

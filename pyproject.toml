@@ -1,0 +1,17 @@
+[project]
+name = "online-randomizer"
+version = "0.1.0"
+description = "Sanqui's Online Randomizer for Game Boy games"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "bidict>=0.24",
+    "flask>=3.1",
+    "gitpython>=3.1",
+    "pypng>=0.20220715",
+    "pyyaml>=6.0",
+    "wtforms>=3.3",
+]
+
+[tool.uv]
+package = false

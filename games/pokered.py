@@ -41,7 +41,7 @@ class PokemonRed(Game):
         h_randomize = Heading("Randomizations")
         
         game_pokemon = BooleanField("Include Pokémon from later generations", description="This is exactly what it sounds like.  150 random Pokémon from all 721 will be picked and inserted into the game's Pokédex.  Check it out.")
-        game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=list(enumerate("I II III IV V VI".split(), start=1)), default=(1, 2, 3, 4, 5, 6), coerce=int, description="This lets you somewhat whitelist the Pokémon you'd like to see.  Try playing with just Gen V, for example!")
+        game_pokemon_source_generations = MultiCheckboxField("Source generations", choices=[SelectChoice(i, gen) for i, gen in enumerate("I II III IV V VI".split(), start=1)], default=(1, 2, 3, 4, 5, 6), coerce=int, description="This lets you somewhat whitelist the Pokémon you'd like to see.  Try playing with just Gen V, for example!")
         pokedex_size = SelectField('Pokédex size', choices=dechoices("151:151;251:251"), default="251")
         special_conversion = SelectField('Special stat conversion', choices=dechoices("average:Average;spa:Sp. Attack;spd:Sp. Defense;higher:Higher stat;random:Random stat"), default="average", description="Since Pokémon Red only has one Special stat, we need to decide on how to transform the two stats of new Pokémon.")
         starter_pokemon = SelectField('Starter Pokémon', choices=dechoices(":Keep;randomize:Random;basics:Random basics;three-basic:Random three stage basics;single:Single random (yellow style)"), default="")

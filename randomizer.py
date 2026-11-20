@@ -15,14 +15,16 @@ def choice(x): return random.choice(tuple(x))
 
 import yaml
 
-from wtforms import Form, BooleanField, TextField, TextAreaField, PasswordField, RadioField, SelectField, SelectMultipleField, BooleanField, HiddenField, SubmitField, Field, validators, ValidationError, widgets
+from wtforms import Form, BooleanField, StringField, TextAreaField, PasswordField, RadioField, SelectField, SelectMultipleField, BooleanField, HiddenField, SubmitField, Field, validators, ValidationError, widgets
 
 from git import *
 repo = Repo(".")
 assert repo.bare == False
 
+from wtforms.fields.choices import SelectChoice
+
 def dechoices(c):
-    return [x.split(':') for x in c.split(';')]
+    return [SelectChoice(*x.split(':')) for x in c.split(';')]
 
 class Heading(Field):
     def __call__(self, **kwargs):
