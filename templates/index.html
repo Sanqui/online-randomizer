@@ -7,7 +7,7 @@
           <td class="not-i td-label">{%- if field.name != "submit" -%}{{- field.label -}}{%- endif -%}</td>
           <td>
             {% if field.description %}
-              <span class="help help-popup" data-content="{{field.description}}">🛈</span>
+              <button type="button" class="help-popup" aria-label="Help: {{field.label.text}}" data-content="{{field.description}}">🛈</button>
             {% endif %}
           </td>
           <td class="not-i td-input">{{ field(**kwargs)|safe }}
@@ -27,7 +27,6 @@
     <meta charset="utf-8">
     <title>Online Randomizer!</title>
     <meta name="viewport" content="width=device-width">
-    <link href="static/css/semantic.min.css" rel="stylesheet" type="text/css" media="all">
     <style>
 
 html {background: #ddd; color: #222; font-family: sans-serif;}
@@ -76,7 +75,13 @@ p {text-indent:4%;}
 
 .unstable {font-weight:bold !important; font-size:16px !important; cursor: default;}
 
-.help-popup {cursor: default;  color: green;}
+.help-popup {cursor: pointer; color: green; background: none; border: 0; padding: 0 4px;
+    font: inherit; line-height: inherit; border-radius: 4px;}
+.help-popup:focus-visible {outline: 2px solid green;}
+/* bigger tap target on touch screens */
+@media (pointer: coarse) {
+    .help-popup {padding: 4px 10px; margin: -4px 0;}
+}
 
 .big-presets .button-big-preset {color: #333; text-transform: none; font-weight: normal; 
     text-align: left; width: 100%;
@@ -92,7 +97,9 @@ button:disabled {cursor: default;}
     
     <!--<script src="http://code.jquery.com/jquery-1.11.1.js"></script>-->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="static/javascript/semantic.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tippy.js@6.3.7/dist/tippy-bundle.umd.min.js" integrity="sha384-AiTRpehQ7zqeua0Ypfa6Q4ki/ddhczZxrKtiQbTQUlJIhBkTeyoZP9/W/5ulFt29" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tippy.js@6.3.7/themes/light-border.css" rel="stylesheet" integrity="sha384-oAnSdqFEFRIeYi0SBLHb5HS5ALP/C8FjjBKFAHpjn/9cXWK3iKVrWaxJRz3t9a91" crossorigin="anonymous">
     <script>
 
 var games = {{games_json | safe}}
@@ -302,11 +309,14 @@ $(document).ready(function(){
         render_options(window.location.hash.substr(1), true)
     }
     
-    $('.help-popup').popup({
-        position: 'top left',
-        delay: 50,
+    tippy('.help-popup[data-content], .unstable[data-content]', {
+        content: function(el) { return el.getAttribute('data-content') },
+        theme: 'light-border',
+        placement: 'top-start',
+        maxWidth: 320,
+        // on touch screens, tap to toggle instead of relying on emulated hover
+        trigger: window.matchMedia('(hover: hover)').matches ? 'mouseenter focus' : 'click',
     })
-    $('.unstable').popup({position: 'bottom center'})
     
     update_all_expanded(true)
 })
