@@ -5,14 +5,16 @@ rm sprites/ backsprites/ backsprites_/ -rf
 mkdir sprites
 
 magick gfx/sprite_sheets/sprites.png -crop 96x96 +repage -scene 1 +adjoin sprites/%03d.png
-mogrify -trim -flop -background white -gravity center -extent 56x56 -dither None -colors 4 sprites/*
+mogrify -trim -flop -background white -gravity center -extent 56x56 sprites/*
+# not `-colors 4`: ImageMagick sometimes drops to 3 colours (see reduce_colors.py)
+uv run python reduce_colors.py sprites/*
 
 #convert xymons.png -crop 59x59 +repage +adjoin -crop 56x56+1+1 -scene 650 -colors 4 sprites/%03d.png
 
 cp sprites backsprites -r
 
 mogrify -trim -flop +repage -background white -gravity northeast -crop 32x32-4+0\! -flatten backsprites/*
-mogrify -dither None -colors 4 backsprites/*
+uv run python reduce_colors.py backsprites/*
 
 mkdir backsprites_
 magick gfx/sprite_sheets/backsprites.png -crop 96x96 +repage -scene 1 +adjoin backsprites_/%03d.png
@@ -31,7 +33,7 @@ done
 set -v
 
 mogrify -trim +repage -background white -gravity south -crop 28x28+0+0\! -gravity northwest -crop 32x32-0-0\! -flatten backsprites_/*
-mogrify -dither None -colors 4 backsprites_/*
+uv run python reduce_colors.py backsprites_/*
 
 cp --update=none backsprites/* backsprites_/
 
