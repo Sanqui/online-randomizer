@@ -12,6 +12,8 @@ import subprocess
 from random import randint, choice, sample, triangular, shuffle # choice we redefine
 
 def choice(x): return random.choice(tuple(x))
+# random.sample() stopped accepting sets in Python 3.11
+def sample(x, k): return random.sample(tuple(x) if isinstance(x, (set, frozenset)) else x, k)
 
 import yaml
 
@@ -162,6 +164,7 @@ class Game():
         # Now let's make us a ROM
         self.debug = debug
         original = open('roms/'+self.filename, 'rb').read()
+        os.makedirs("static/roms", exist_ok=True)
         if filename:
             filename = filename.replace('/', '_').replace('\0', '').replace('?', '_').replace('#', '_')
             filename = "static/roms/"+filename
@@ -174,7 +177,7 @@ class Game():
             while os.path.isfile(filename):
                 filename = filename.split('.')
                 filename[-2] += '_'
-                filename = filename.join('.')
+                filename = '.'.join(filename)
         self.rom = ROM(filename, 'w+b')
         self.rom.write(original)
         
@@ -223,7 +226,8 @@ game.choices["tfanger_denjuu"] = True
 game.choices["item_prices"] = True
 rom = game.produce()'''
 if __name__ == "__main__":
-    game = randomizer_games[0]( ) #PokemonRed()
+    import randomizer
+    game = next(g for g in randomizer.randomizer_games if g.identifier == "pokered")()
     '''game.choices["starter_pokemon"] = True
     game.choices["trainer_pokemon"] = True
     game.choices["wild_pokemon"] = True'''

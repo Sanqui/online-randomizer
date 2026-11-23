@@ -1,0 +1,5 @@
+# repo is mounted at runtime
+*
+!pyproject.toml
+!uv.lock
+!.python-version

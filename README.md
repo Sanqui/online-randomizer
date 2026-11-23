@@ -13,6 +13,22 @@ uv sync
 uv run app.py                                # serves on http://localhost:8580
 ```
 
+### With podman
+
+Building the base ROM needs rgbds 0.2.5 and Python 2 (for the pokemontools in
+`sources/pokered/extras`), which the `Containerfile` provides. The repo is
+bind-mounted into the container, so build outputs land in your checkout.
+
+```sh
+# the extras submodule URL uses git://, which GitHub no longer serves
+git -C sources/pokered -c url."https://github.com/".insteadOf="git://github.com/" submodule update --init extras
+
+podman build -t online-randomizer .
+podman run --rm -v .:/app:z online-randomizer ./convert_sprites.sh          # once, if sprites/ is missing
+podman run --rm -v .:/app:z online-randomizer uv run randomizer.py          # test ROM -> static/roms/
+podman run --rm -v .:/app:z --network=host online-randomizer                # web UI on http://localhost:8580
+```
+
 License
 ---
 * Do not run this in production (i.e., host it) without my permission.
