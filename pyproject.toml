@@ -8,6 +8,7 @@ dependencies = [
     "bidict>=0.24",
     "flask>=3.1",
     "gitpython>=3.1",
+    "gunicorn>=27.0.1",
     "pypng>=0.20220715",
     "pyyaml>=6.0",
     "wtforms>=3.3",

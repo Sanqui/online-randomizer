@@ -7,7 +7,10 @@ import json
 
 from flask import Flask
 from flask import render_template, jsonify, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 app = Flask(__name__)
+# Behind nginx, so take the client IP (used for cooldowns) from X-Forwarded-For
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 app.config['APPLICATION_ROOT'] = '/randomizer'
 
 @app.template_filter('datetime')
